@@ -123,7 +123,6 @@
         .form-group-split .form-group { flex: 1; margin-bottom: 0; }
         .form-group-split label { width: auto; margin-right: 8px; }
 
-        /* Checkbox & Radio Card Looks */
         .checkbox-group { border: 1px solid #000; padding: 15px; border-radius: 6px; background: #fafafa; }
         .checkbox-group h4 { margin: 0 0 10px 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; color: #0f172a;}
         .checkbox-label { display: block; margin-bottom: 8px; cursor: pointer; font-size: 14px; padding: 2px 0;}
@@ -150,6 +149,22 @@
             margin-bottom: 15px; font-family: inherit; font-size: 14px;
         }
         textarea:focus { outline: none; border-color: var(--primary); }
+
+        /* KOTAK KETERANGAN + TOMBOL KAMERA MINI */
+        .note-cam-box { display: flex; align-items: center; gap: 4px; width: 100%; }
+        .note-cam-box input.table-input { flex: 1; }
+        .btn-cam-mini { 
+            display: inline-flex; align-items: center; justify-content: center; 
+            width: 32px; height: 28px; background: #f1f5f9; border: 1px solid #cbd5e1; 
+            border-radius: 4px; cursor: pointer; font-size: 14px; transition: 0.2s; flex-shrink: 0;
+        }
+        .btn-cam-mini:active { transform: scale(0.90); }
+        .btn-cam-mini input[type="file"] { display: none; }
+
+        /* LIVE UPLOAD KOTAK BESAR (DOKUMENTASI UMUM) */
+        .live-upload-card { border: 2px dashed #0056b3; background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
+        .custom-file-upload { display: inline-block; padding: 10px 20px; cursor: pointer; background: #0056b3; color: white; font-weight: bold; border-radius: 6px; font-size: 13px; }
+        .preview-container { margin-top: 10px; font-size: 13px; }
 
         /* 5. TTD DIGITAL */
         .signature-section { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 35px; }
@@ -178,41 +193,30 @@
 
         @media (max-width: 992px) {
             .kop-surat { grid-template-columns: auto 1fr auto; }
-            .kop-flag { display: none; } /* Sembunyikan bendera di tablet agar lega */
+            .kop-flag { display: none; }
             .grid-2 { grid-template-columns: 1fr; gap: 15px; }
         }
 
         @media (max-width: 768px) {
             body { padding: 10px; }
             .container { padding: 15px; }
-            
-            /* Kop Surat turun ke bawah */
             .kop-surat { grid-template-columns: 1fr; text-align: center; gap: 10px; padding: 12px;}
             .kop-logo { text-align: center; }
             .kop-meta { border-left: none; border-top: 1px solid var(--border-color); padding-left: 0; padding-top: 10px; display: flex; justify-content: space-around; flex-wrap: wrap; gap: 5px;}
-            
-            /* Tabs berubah wujud */
             .nav-tabs { flex-direction: column; gap: 0; border-bottom: none; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); }
             .nav-tabs button { border: none; border-bottom: 1px solid var(--border-color); border-radius: 0; text-align: left; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; }
             .nav-tabs button:last-child { border-bottom: none; }
             .nav-tabs button::after { content: '▼'; font-size: 10px; opacity: 0.5; }
             .nav-tabs button.active::after { content: '●'; color: #fff; opacity: 1; }
-
-            /* Form menumpuk ke bawah */
             .form-group { flex-direction: column; align-items: flex-start; }
             .form-group label { width: 100%; margin-bottom: 4px; }
             .form-group input[type="text"], .form-group input[type="date"], .form-group input[type="time"] { width: 100%; }
             .form-group-split { width: 100%; }
-
             .grid-3 { grid-template-columns: 1fr; gap: 15px; }
-            
-            /* TTD Turun berjejer ke bawah */
             .signature-section { grid-template-columns: 1fr; gap: 20px; }
             .signature-box { max-width: 100%; }
-
             .btn-group { flex-direction: column; gap: 10px; }
             .btn { width: 100%; }
-
             .tindakan-lanjut-area { flex-direction: column; align-items: flex-start !important; gap: 10px; }
             #inputTujuanContainer { margin-left: 0 !important; width: 100%; }
         }
@@ -223,7 +227,7 @@
             .container { box-shadow: none; max-width: 100%; padding: 0; }
             .kop-surat { grid-template-columns: 15% 50% 25% 10% !important; display: grid !important; border: 2px solid #000; }
             .kop-flag { display: block !important; text-align: center; }
-            .nav-tabs, .btn-group, .btn-clear-sig { display: none !important; }
+            .live-upload-card, .btn-cam-mini, .nav-tabs, .btn-group, .btn-clear-sig { display: none !important; }
             .tab-content { display: none; }
             .tab-content.active { display: block !important; }
             .canvas-container { border: none !important; }
@@ -266,6 +270,9 @@
         <button onclick="openTab(event, 'serviceReport')">Service Report</button>
     </div>
 
+    <!-- ========================================================
+         TAB 1: TECHNICAL REPORT
+    ============================================================= -->
     <div id="techReport" class="tab-content active">
         <div class="header-title">
             TECHNICAL REPORT
@@ -276,7 +283,8 @@
             <div>
                 <div class="form-group"><label>No. Surat Tugas:</label><input type="text"></div>
                 <div class="form-group"><label>Tanggal:</label><input type="date"></div>
-                <div class="form-group"><label>Nama Pelanggan:</label><input type="text"></div>
+                <!-- ID "tr_cust" ditambahkan untuk penamaan file otomatis -->
+                <div class="form-group"><label>Nama Pelanggan:</label><input type="text" id="tr_cust" placeholder="PT / Rumah Sakit / Klien..."></div>
                 <div class="form-group"><label>Alamat:</label><input type="text"></div>
                 <div class="form-group">
                     <label>Kontak:</label>
@@ -348,6 +356,16 @@
             </table>
         </div>
 
+        <!-- FITUR UPLOAD UMUM TECH REPORT -->
+        <div class="live-upload-card">
+            <h4 style="margin:0 0 8px 0; color:var(--primary);">📸 Upload Dokumentasi Lapangan (Masuk ke Folder G-Drive Tech)</h4>
+            <label class="custom-file-upload">
+                📷 Buka Kamera / Pilih Foto
+                <input type="file" accept="image/*" capture="environment" onchange="uploadGeneralPic(this, 'tech', 'previewTech')">
+            </label>
+            <div id="previewTech" class="preview-container"></div>
+        </div>
+
         <b style="display:block; margin-bottom:8px; color:#0f172a;">Uraian/Kronologis Pekerjaan (Lengkapi gambar/skema jika ada):</b>
         <textarea rows="5" placeholder="Tuliskan urutan kerja yang dilakukan secara jelas..."></textarea>
 
@@ -403,13 +421,17 @@
         </div>
     </div>
 
+    <!-- ========================================================
+         TAB 2: SERVICE REPORT
+    ============================================================= -->
     <div id="serviceReport" class="tab-content">
         <div class="header-title">SERVICE REPORT</div>
         
         <div class="grid-2">
             <div>
                 <div class="form-group"><label>Tanggal Service:</label><input type="date"></div>
-                <div class="form-group"><label>Nama Pelanggan:</label><input type="text"></div>
+                <!-- ID "sr_cust" ditambahkan untuk penamaan file otomatis -->
+                <div class="form-group"><label>Nama Pelanggan:</label><input type="text" id="sr_cust" placeholder="PT / Rumah Sakit / Klien..."></div>
                 <div class="form-group"><label>Alamat Lokasi:</label><input type="text"></div>
                 <div class="form-group"><label>No Surat Tugas:</label><input type="text"></div>
             </div>
@@ -440,6 +462,16 @@
             </div>
         </div>
 
+        <!-- FITUR UPLOAD UMUM SERVICE REPORT -->
+        <div class="live-upload-card" style="border-color:#28a745;">
+            <h4 style="margin:0 0 8px 0; color:#28a745;">📸 Upload Dokumentasi Unit Mesin Service (Masuk ke Folder G-Drive Service)</h4>
+            <label class="custom-file-upload" style="background:#28a745;">
+                📷 Buka Kamera / Pilih Foto
+                <input type="file" accept="image/*" capture="environment" onchange="uploadGeneralPic(this, 'service', 'previewServ')">
+            </label>
+            <div id="previewServ" class="preview-container"></div>
+        </div>
+
         <b style="display:block; margin-bottom:8px; color:#0f172a;">Part yang diganti :</b>
         <div class="table-responsive">
             <table class="form-table">
@@ -461,81 +493,121 @@
             </table>
         </div>
 
-        <b style="display:block; margin-bottom:8px; color:#0f172a;">Checklist Parameter Operasional :</b>
+        <b style="display:block; margin-bottom:8px; color:#0f172a;">Checklist Parameter Operasional (No. 1 s/d No. 8 Dilengkapi Tombol Kamera Spesifik per Baris) :</b>
         
         <div class="table-responsive">
-            <table class="form-table" style="min-width: 850px;">
+            <table class="form-table" style="min-width: 880px;">
                 <thead>
                     <tr>
                         <th width="4%">No</th><th width="16%">Produk</th><th width="22%">Item Pemeriksaan</th>
                         <th width="11%">Nilai Awal</th><th width="11%">Nilai Standar</th><th width="11%">Nilai Akhir</th>
-                        <th width="7%">Satuan</th><th>Catatan / Keterangan</th>
+                        <th width="7%">Satuan</th><th>Catatan + 📷 Foto Item</th>
                     </tr>
                 </thead>
                 <tbody>
+                    <!-- 1. Pompa Filter -->
                     <tr><td rowspan="3" align="center"><b>1</b></td><td rowspan="3"><b>Pompa Filter</b></td>
-                        <td>Titik nyala pompa</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>20</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
-                    <tr><td>Titik mati pompa</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>40 - 60</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
-                    <tr><td>Setting & test WLC</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input"></td></tr>
+                        <td>Titik nyala pompa</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>20</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini" title="Foto Meteran">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '1_PompaFilter_Nyala')"></label></div></td></tr>
+                    <tr><td>Titik mati pompa</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>40 - 60</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini" title="Foto Meteran">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '1_PompaFilter_Mati')"></label></div></td></tr>
+                    <tr><td>Setting & test WLC</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini" title="Foto Item">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '1_PompaFilter_WLC')"></label></div></td></tr>
 
+                    <!-- 2. Pompa Distribusi -->
                     <tr><td rowspan="3" align="center"><b>2</b></td><td rowspan="3"><b>Pompa Distribusi</b></td>
-                        <td>Titik nyala pompa</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>20</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
-                    <tr><td>Titik mati pompa</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>30 - 50</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
-                    <tr><td>Setting & test WLC</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input"></td></tr>
+                        <td>Titik nyala pompa</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>20</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini" title="Foto Meteran">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '2_PompaDist_Nyala')"></label></div></td></tr>
+                    <tr><td>Titik mati pompa</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>30 - 50</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini" title="Foto Meteran">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '2_PompaDist_Mati')"></label></div></td></tr>
+                    <tr><td>Setting & test WLC</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini" title="Foto Item">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '2_PompaDist_WLC')"></label></div></td></tr>
 
+                    <!-- 3. Filter Softener -->
                     <tr><td rowspan="4" align="center"><b>3</b></td><td rowspan="4"><b>Filter Softener</b></td>
-                        <td>Tekanan inlet filter</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>30 - 60</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
-                    <tr><td>Tekanan outlet filter</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>30 - 40</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
-                    <tr><td>Siklus Backwash</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>2 - 3</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Hari</td><td><input type="text" class="table-input"></td></tr>
-                    <tr><td>Siklus Regenerasi</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>2</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Hari</td><td><input type="text" class="table-input"></td></tr>
+                        <td>Tekanan inlet filter</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>30 - 60</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini" title="Foto Meteran">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '3_Softener_Inlet')"></label></div></td></tr>
+                    <tr><td>Tekanan outlet filter</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>30 - 40</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini" title="Foto Meteran">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '3_Softener_Outlet')"></label></div></td></tr>
+                    <tr><td>Siklus Backwash</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>2 - 3</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Hari</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '3_Softener_Backwash')"></label></div></td></tr>
+                    <tr><td>Siklus Regenerasi</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>2</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Hari</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '3_Softener_Regenerasi')"></label></div></td></tr>
 
+                    <!-- 4. Filter Carbon -->
                     <tr><td rowspan="3" align="center"><b>4</b></td><td rowspan="3"><b>Filter Carbon</b></td>
-                        <td>Tekanan inlet filter</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>30 - 60</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
-                    <tr><td>Tekanan outlet filter</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>30 - 40</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
-                    <tr><td>Siklus Backwash</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>2 - 3</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Hari</td><td><input type="text" class="table-input"></td></tr>
+                        <td>Tekanan inlet filter</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>30 - 60</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini" title="Foto Meteran">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '4_Carbon_Inlet')"></label></div></td></tr>
+                    <tr><td>Tekanan outlet filter</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>30 - 40</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini" title="Foto Meteran">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '4_Carbon_Outlet')"></label></div></td></tr>
+                    <tr><td>Siklus Backwash</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>2 - 3</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Hari</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '4_Carbon_Backwash')"></label></div></td></tr>
 
+                    <!-- 5. Reverse Osmosis -->
                     <tr><td rowspan="13" align="center"><b>5</b></td><td rowspan="13"><b>Reverse Osmosis (RO)</b></td>
-                        <td>Inlet micron filter</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>30 - 40</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
-                    <tr><td>Outlet micron filter</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>15 - 40</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
-                    <tr><td>Tekanan operasi</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>100 - 175</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
-                    <tr><td>Tekanan flushing</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>50 - 100</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
-                    <tr><td>Flow product</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Lpm</td><td><input type="text" class="table-input"></td></tr>
-                    <tr><td>Flow reject</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Lpm</td><td><input type="text" class="table-input"></td></tr>
-                    <tr><td>TDS air baku</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>500</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Ppm</td><td><input type="text" class="table-input"></td></tr>
-                    <tr><td>TDS air produk</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>&lt; 15</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Ppm</td><td><input type="text" class="table-input"></td></tr>
-                    <tr><td>Titik pressure rendah</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>10</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
-                    <tr><td>Titik pressure tinggi</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>175</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
-                    <tr><td>Ganti micron filter</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>3</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Bln</td><td><input type="text" class="table-input"></td></tr>
-                    <tr><td>Ganti membrane</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>1</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Thn</td><td><input type="text" class="table-input"></td></tr>
-                    <tr><td>Setting WLC</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input"></td></tr>
+                        <td>Inlet micron filter</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>30 - 40</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini" title="Foto Meteran">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '5_RO_InletMicron')"></label></div></td></tr>
+                    <tr><td>Outlet micron filter</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>15 - 40</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini" title="Foto Meteran">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '5_RO_OutletMicron')"></label></div></td></tr>
+                    <tr><td>Tekanan operasi</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>100 - 175</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini" title="Foto Meteran">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '5_RO_TekOperasi')"></label></div></td></tr>
+                    <tr><td>Tekanan flushing</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>50 - 100</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini" title="Foto Meteran">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '5_RO_TekFlushing')"></label></div></td></tr>
+                    <tr><td>Flow product</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Lpm</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini" title="Foto Meteran">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '5_RO_FlowProduct')"></label></div></td></tr>
+                    <tr><td>Flow reject</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Lpm</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini" title="Foto Meteran">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '5_RO_FlowReject')"></label></div></td></tr>
+                    <tr><td>TDS air baku</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>500</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Ppm</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini" title="Foto TDS">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '5_RO_TDSBaku')"></label></div></td></tr>
+                    <tr><td>TDS air produk</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>&lt; 15</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Ppm</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini" title="Foto TDS">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '5_RO_TDSProduk')"></label></div></td></tr>
+                    <tr><td>Titik pressure rendah</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>10</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '5_RO_PressLow')"></label></div></td></tr>
+                    <tr><td>Titik pressure tinggi</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>175</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '5_RO_PressHigh')"></label></div></td></tr>
+                    <tr><td>Penggantian micron filter</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>3</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Bulan</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '5_RO_GantiMicron')"></label></div></td></tr>
+                    <tr><td>Penggantian membrane</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>1</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Tahun</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '5_RO_GantiMembrane')"></label></div></td></tr>
+                    <tr><td>Setting & test WLC</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '5_RO_SettingWLC')"></label></div></td></tr>
 
-                    <tr><td align="center"><b>6</b></td><td><b>Micron Filter</b> (0,22µ)</td><td>Kondisi Fisik</td>
+                    <!-- 6. Micron Filter -->
+                    <tr><td align="center"><b>6</b></td><td><b>Micron Filter</b><br>(0,22 micron)</td><td>Kondisi Fisik</td>
                         <td colspan="4" style="padding-left:15px;">
-                            <label class="radio-inline"><input type="radio" name="kondisi_micron"> Bersih</label>
-                            <label class="radio-inline"><input type="radio" name="kondisi_micron"> Kotor</label>
-                        </td><td><input type="text" class="table-input"></td>
+                            <label class="radio-inline"><input type="radio" name="kondisi_micron"> Keadaan Bersih</label>
+                            <label class="radio-inline"><input type="radio" name="kondisi_micron"> Keadaan Kotor</label>
+                        </td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini" title="Foto Filter">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '6_Micron_Kondisi')"></label></div></td>
                     </tr>
 
-                    <tr><td rowspan="2" align="center"><b>7</b></td><td rowspan="2"><b>Filter Mixedbed</b></td>
-                        <td>Tekanan tabung</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>20 - 40</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
-                    <tr><td>Nilai konduktivitas</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>&lt; 1</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">µs</td><td><input type="text" class="table-input"></td></tr>
+                    <!-- 7. Filter Mixedbed -->
+                    <tr><td rowspan="2" align="center"><b>7</b></td><td rowspan="2"><b>Filter mixedbed</b></td>
+                        <td>Tekanan pada filter</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>20 - 40</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '7_Mixedbed_Tekanan')"></label></div></td></tr>
+                    <tr><td>Nilai conductivity</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>&lt; 1</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">µs</td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini" title="Foto Digital Meter">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '7_Mixedbed_Konduktivitas')"></label></div></td></tr>
 
-                    <tr><td rowspan="2" align="center"><b>8</b></td><td rowspan="2"><b>Ultraviolet (UV)</b></td><td>Lampu UV</td>
+                    <!-- 8. Lampu Ultraviolet -->
+                    <tr><td rowspan="2" align="center"><b>8</b></td><td rowspan="2"><b>Lampu Ultraviolet</b></td><td>Kondisi lampu</td>
                         <td colspan="4" style="padding-left:15px;">
-                            <label class="radio-inline"><input type="radio" name="lampu"> Ganti Baru</label>
-                            <label class="radio-inline"><input type="radio" name="lampu"> Tidak Ganti</label>
-                        </td><td><input type="text" class="table-input"></td></tr>
-                    <tr><td>Ballast UV</td>
+                            <label class="radio-inline"><input type="radio" name="lampu"> Ada Penggantian</label>
+                            <label class="radio-inline"><input type="radio" name="lampu"> Tidak Ada Penggantian</label>
+                        </td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '8_UV_Lampu')"></label></div></td></tr>
+                    <tr><td>Kondisi ballast</td>
                         <td colspan="4" style="padding-left:15px;">
-                            <label class="radio-inline"><input type="radio" name="ballast"> Ganti Baru</label>
-                            <label class="radio-inline"><input type="radio" name="ballast"> Tidak Ganti</label>
-                        </td><td><input type="text" class="table-input"></td></tr>
+                            <label class="radio-inline"><input type="radio" name="ballast"> Ada Penggantian</label>
+                            <label class="radio-inline"><input type="radio" name="ballast"> Tidak Ada Penggantian</label>
+                        </td>
+                        <td><div class="note-cam-box"><input type="text" class="table-input"><label class="btn-cam-mini">📷<input type="file" accept="image/*" capture="environment" onchange="uploadItemPic(this, '8_UV_Ballast')"></label></div></td></tr>
 
-                    <tr><td rowspan="4" align="center"><b>9</b></td><td rowspan="4"><b>Lain-Lain</b></td>
-                        <td>Cek kebocoran pipa</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input" placeholder="Aman / Ada perbaikan..."></td></tr>
-                    <tr><td>Fungsi pelampung WLC</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input"></td></tr>
-                    <tr><td>Panel kelistrikan</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input"></td></tr>
-                    <tr><td>Kerapihan jalur kabel</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input"></td></tr>
+                    <!-- 9. Lain-lain (Tanpa Kamera) -->
+                    <tr><td rowspan="4" align="center"><b>9</b></td><td rowspan="4"><b>Lainnya</b></td>
+                        <td>Cek & perbaikan kebocoran</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input" placeholder="Aman / Ada perbaikan..."></td></tr>
+                    <tr><td>Cek & fungsi WLC</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input"></td></tr>
+                    <tr><td>Cek & fungsi electrical system</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input"></td></tr>
+                    <tr><td>Cek kerapihan instalasi & electrical</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input"></td></tr>
                 </tbody>
             </table>
         </div>
@@ -585,6 +657,11 @@
 </div>
 
 <script>
+    // =========================================================================
+    // URL WEB APP MILIK ANDA (SUDAH TERTANAM AKTIF)
+    // =========================================================================
+    const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzZhoFSomcNaW9ry1locl-55HlsYxLQzWbQwPIMw1l5lx-kxargUcN1PFS7gt6oKB1F/exec";
+
     // 1. Tab Logic
     function openTab(evt, tabName) {
         document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
@@ -646,6 +723,85 @@
     function clearCanvas(id) {
         const c = document.getElementById(id);
         c.getContext('2d').clearRect(0, 0, c.width, c.height);
+    }
+
+    // =========================================================================
+    // FUNGSI UPLOAD KE GOOGLE DRIVE REALTIME
+    // =========================================================================
+
+    // A. UPLOAD FOTO UMUM (KOTAK BESAR DI ATAS TABEL)
+    function uploadGeneralPic(fileInput, folderType, previewBoxId) {
+        const file = fileInput.files[0]; if(!file) return;
+        const pBox = document.getElementById(previewBoxId);
+        pBox.innerHTML = `<div style="background:#fff3cd; color:#856404; padding:8px; border-radius:5px; font-weight:bold;">⏳ Mengunggah dokumentasi umum...</div>`;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const base64Clean = e.target.result.split(',')[1];
+            const custInput = document.getElementById(folderType === 'tech' ? 'tr_cust' : 'sr_cust');
+            const custName = (custInput && custInput.value) ? custInput.value : "TanpaNamaKlien";
+            const timeCode = new Date().toTimeString().split(' ')[0].replace(/:/g, '');
+            const safeName = `Foto_${folderType.toUpperCase()}_UMUM_${custName.replace(/[^a-zA-Z0-9]/g,'')}_${timeCode}.${file.name.split('.').pop()}`;
+
+            fetch(APPS_SCRIPT_WEBAPP_URL, {
+                method: 'POST', body: JSON.stringify({ folderType, filename: safeName, mimeType: file.type, base64: base64Clean })
+            }).then(r=>r.json()).then(res=>{
+                if(res.status==="success") pBox.innerHTML = `<div style="background:#d4edda; color:#155724; padding:8px; border-radius:5px;">✅ <b>Terunggah!</b> <a href="${res.url}" target="_blank" style="color:#0056b3;">[ Buka File di G-Drive ]</a></div>`;
+                else pBox.innerHTML = `<div style="color:red;">❌ Gagal: ${res.message}</div>`;
+            }).catch(()=> pBox.innerHTML = `<div style="color:red;">❌ Gagal terkoneksi ke Google Script.</div>`);
+        }; reader.readAsDataURL(file);
+    }
+
+    // B. UPLOAD FOTO SPESIFIK METERAN PER BARIS (TOMBOL MINI DALAM TABEL)
+    function uploadItemPic(fileInput, itemCodeName) {
+        const file = fileInput.files[0]; if(!file) return;
+        const labelBtn = fileInput.parentElement;
+        
+        labelBtn.innerHTML = "⏳";
+        labelBtn.style.pointerEvents = "none";
+        labelBtn.style.background = "#ffe888";
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const base64Clean = e.target.result.split(',')[1];
+            const custInput = document.getElementById('sr_cust');
+            const custName = (custInput && custInput.value) ? custInput.value : "TanpaNamaKlien";
+            const safeCust = custName.replace(/[^a-zA-Z0-9]/g, '');
+            const timeCode = new Date().toTimeString().split(' ')[0].replace(/:/g, '');
+            
+            const safeFileName = `Foto_SERV_${itemCodeName}_${safeCust}_${timeCode}.${file.name.split('.').pop()}`;
+
+            fetch(APPS_SCRIPT_WEBAPP_URL, {
+                method: 'POST',
+                body: JSON.stringify({ folderType: 'service', filename: safeFileName, mimeType: file.type, base64: base64Clean })
+            })
+            .then(r => r.json())
+            .then(res => {
+                if(res.status === "success") {
+                    labelBtn.innerHTML = "✅";
+                    labelBtn.style.background = "#28a745";
+                    labelBtn.style.color = "#fff";
+                    labelBtn.style.borderColor = "#1e7e34";
+                    labelBtn.style.pointerEvents = "auto";
+                    labelBtn.setAttribute('title', 'Foto Berhasil Terkirim! Klik untuk melihat di Google Drive');
+                    labelBtn.onclick = (event) => {
+                        event.preventDefault();
+                        window.open(res.url, '_blank');
+                    };
+                } else {
+                    labelBtn.innerHTML = "❌";
+                    labelBtn.style.background = "#d9534f";
+                    alert("Gagal upload: " + res.message);
+                }
+            })
+            .catch(() => {
+                labelBtn.innerHTML = "📷";
+                labelBtn.style.background = "#f1f5f9";
+                labelBtn.style.pointerEvents = "auto";
+                alert("Gagal mengirim foto item. Koneksi internet terputus.");
+            });
+        };
+        reader.readAsDataURL(file);
     }
 
     // 6. Submit Simulation
