@@ -3,1374 +3,895 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Form Aktual Operator Produksi - PT Tirta Teknosys (Aksesibilitas)</title>
+    <title>Daily Teknisi Report - PT Tirta Teknosys</title>
     
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <script src="https://www-d-gstatic-d-com-s-gmn.pixivcn.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www-d-gstatic-d-com-s-gmn.pixivcn.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-    
+
     <style>
         :root {
-            /* Warna Latar Belakang dan Panel Baru (Terang) - Jauh lebih mudah diakses */
-            --bg-dark: #F1F5F9; /* Abu-abu sangat muda yang bersih */
-            --glass-bg: #FFFFFF; /* Putih bersih untuk panel */
-            --glass-border: #E2E8F0; /* Abu-abu muda untuk batas panel */
-            
-            /* Aksen Neon (disesuaikan agar lebih gelap dan kontras di background putih) */
-            --neon-cyan: #0088CC; 
-            --neon-blue: #005580; 
-            --danger: #DC2626; 
-            --warning: #F59E0B; 
-            --success: #16A34A; 
-            --gold: #CA8A04; 
-
-            /* Warna Teks Baru (Gelap) */
-            --text-main: #1A202C; /* Biru tua/hitam pekat untuk teks utama */
-            --text-muted: #64748B; /* Abu-abu tua untuk teks diredam */
-            
-            /* Latar Belakang Input Baru (Terang) */
-            --input-bg: #FFFFFF; /* Putih bersih untuk input */
+            --primary: #0056b3;
+            --success: #28a745;
+            --danger: #d9534f;
+            --text-main: #000000;
+            --bg-body: #f0f4f8;
+            --border-color: #000000;
         }
 
-        *, *::before, *::after { box-sizing: border-box; }
-        
+        * { box-sizing: border-box; }
+
         body {
-            font-family: 'Rajdhani', 'Segoe UI', sans-serif;
-            background-color: var(--bg-dark);
-            background-attachment: fixed;
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px 15px;
-            line-height: 1.6;
-        }
-        
-        .d-none, .hidden { display: none !important; }
-        
-        /* Glassmorphism Card Style (Light theme) */
-        .glass-panel {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-        
-        /* Highlight border for Developer Dashboard */
-        .kpi-panel {
-            border: 1px solid var(--gold);
-            box-shadow: 0 0 10px rgba(202, 138, 4, 0.1);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0; padding: 15px;
+            background-color: var(--bg-body); color: var(--text-main); line-height: 1.4;
         }
 
-        /* Halaman Login */
-        .login-wrapper {
-            max-width: 400px;
-            margin: 10vh auto;
-            padding: 40px 30px;
+        .container {
+            max-width: 1200px; margin: 0 auto; background: #fff; padding: 25px;
+            border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08);
+        }
+        
+        /* KOP SURAT */
+        .kop-surat {
+            display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 15px;
+            border: 2px solid #000; padding: 15px; margin-bottom: 25px; background-color: #fff;
+        }
+        .kop-logo img { max-width: 110px; height: auto; }
+        .kop-title { text-align: center; }
+        .kop-title h2 { margin: 0 0 5px 0; color: var(--primary); font-size: 22px; letter-spacing: 0.5px; font-weight:900; }
+        .realtime-clock { font-size: 13px; font-weight: 600; color: var(--danger); background: #fdf2f2; padding: 3px 10px; border-radius: 20px; display: inline-block;}
+        .kop-meta { font-size: 12px; font-weight: 700; border-left: 2px solid #000; padding-left: 15px; }
+        .kop-meta div { margin-bottom: 4px; }
+        .kop-flag img { max-width: 55px; border: 1px solid #000; border-radius: 3px; }
+
+        /* NAVIGATION TABS */
+        .nav-tabs { display: flex; gap: 5px; border-bottom: 3px solid var(--primary); margin-bottom: 25px; }
+        .nav-tabs button {
+            flex: 1; background: #f1f5f9; border: 1px solid #000; border-bottom: none;
+            padding: 14px 15px; cursor: pointer; font-size: 15px; font-weight: 600; color: #334155;
+            transition: all 0.2s ease;
+        }
+        .nav-tabs button:hover { background: #e2e8f0; color: var(--primary); }
+        .nav-tabs button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .nav-tabs button.btn-history { background: #e2e8f0; color: #000; }
+        .nav-tabs button.btn-history.active { background: #334155; color: #fff; border-color: #334155; }
+        
+        .tab-content { display: none; animation: fadeIn 0.4s; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* MENCEGAH BROWSER MEMBUAT TEKS READONLY JADI ABU-ABU */
+        input:read-only, textarea:read-only, input:disabled, textarea:disabled, 
+        .table-input:read-only, .table-area:read-only {
+            color: #000000 !important;
+            -webkit-text-fill-color: #000000 !important;
+            opacity: 1 !important;
+            background-color: #f1f5f9 !important;
+            font-weight: 900 !important;
+        }
+
+        .box-header {
+            background-color: #e2e8f0;
+            margin: -15px -15px 12px -15px;
+            padding: 8px 10px;
+            border-bottom: 1px solid #000;
             text-align: center;
-        }
-        .login-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--neon-cyan);
-            margin-bottom: 5px;
-            letter-spacing: 1px;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-        }
-        .login-subtitle {
+            font-weight: 900;
+            color: #000;
             font-size: 14px;
-            color: var(--text-muted);
-            margin-bottom: 25px;
-            line-height: 1.4;
-        }
-        
-        /* Form Utama */
-        .form-wrapper {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 30px;
-        }
-        
-        /* HUD Header (Live Clock & Controls) */
-        .live-clock-container {
-            background: rgba(0, 136, 204, 0.05);
-            border: 1px solid var(--glass-border);
-            color: var(--neon-cyan);
-            padding: 12px 20px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            font-size: 15px;
-            font-weight: 600;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: inset 0 0 10px rgba(0, 136, 204, 0.05);
         }
 
-        .header-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .header-title { text-align: center; border: 2px solid #000; padding: 10px; margin-bottom: 20px; font-weight: 900; font-size: 22px; letter-spacing: 1px; background: #e2e8f0; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        
+        .form-box { border: 1px solid #000; padding: 15px; background: #fff; }
+        .checkbox-group { border: 1px solid #000; padding: 15px; background: #fff; }
+        .checkbox-label { display: block; margin-bottom: 8px; cursor: pointer; font-size: 14px; padding: 2px 0; color: #000; font-weight: 700;}
+        .checkbox-label input { margin-right: 8px; transform: scale(1.1); }
+
+        .form-group { display: flex; margin-bottom: 12px; align-items: center; }
+        .form-group label { width: 160px; font-weight: 800; font-size: 13px; color: #000; }
+        .form-group input[type="text"], .form-group input[type="date"], .form-group input[type="time"] { 
+            flex: 1; padding: 8px 10px; border: 1px solid #000; font-size: 14px; color: #000; font-weight: 800; 
         }
+        
+        .form-group-split { display: flex; gap: 15px; flex: 1; }
+        .form-group-split .form-group { flex: 1; margin-bottom: 0; }
+        .form-group-split label { width: auto; margin-right: 8px; }
+
+        /* TABEL ISO PT TIRTA TEKNOSYS */
+        .table-responsive { width: 100%; overflow-x: auto; margin-bottom: 20px; border: 1px solid #000; }
+        table.form-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        table.form-table th, table.form-table td { border: 1px solid #000; padding: 5px 6px; vertical-align: middle; }
+        table.form-table th { background-color: #e2e8f0; font-weight: 900; text-align: center; color: #000; padding: 8px 6px; }
+        
+        input.table-input { width: 100%; border: none; outline: none; background: transparent; padding: 2px 4px; font-size: 13px; font-family: inherit; font-weight: 800; color: #000; }
+        textarea.table-area { width: 100%; border: none; outline: none; background: transparent; padding: 4px; font-size: 13px; font-family: inherit; resize: none; font-weight: 800; color: #000; }
+
+        /* TTD & SARAN BAWAH */
+        .bottom-layout { display: flex; gap: 15px; align-items: stretch; margin-top: 10px; }
+        .box-saran { flex: 0 0 35%; border: 1px solid #000; display: flex; flex-direction: column; background: #fff; }
+        .box-saran-title { background-color: #e2e8f0; border-bottom: 1px solid #000; padding: 8px 10px; font-weight: 900; font-size:13px; text-align:center; color: #000; }
+        .box-ttd-group { flex: 1; border: 1px solid #000; display: flex; flex-direction: column; background: #fff; }
+        .box-ttd-header { display: flex; border-bottom: 1px solid #000; background-color: #e2e8f0; font-weight: 900; text-align: center; font-size: 13px; color: #000; }
+        .box-ttd-header div { padding: 8px; }
+        .box-ttd-body { display: flex; flex: 1; padding: 15px 5px 5px 5px; justify-content: space-around; text-align: center; align-items: flex-end; }
+        .ttd-item { width: 30%; }
+        .canvas-container { border: 1px dashed #000; background: #fff; margin: 0 auto 5px auto; width: 140px; height: 65px; position: relative; }
+        .sig-canvas { cursor: crosshair; width: 100%; height: 100%; touch-action: none; }
+        .btn-clear-sig { position: absolute; top: 2px; right: 2px; font-size: 9px; padding: 2px 5px; background: #ef4444; color: white; border: none; border-radius: 3px; cursor: pointer;}
+        .signer-name { text-align: center; border: none; border-bottom: 1px solid #000; outline: none; width: 95%; font-size: 12px; font-weight: 900; margin-bottom: 3px; color:#000;}
+        .ttd-label { border-top: 1px solid #000; font-size: 11px; font-weight: bold; padding-top: 2px; color: #000;}
+
+        /* LIVE UPLOAD */
+        .live-upload-card { border: 2px dashed #0056b3; background: #f8fafc; padding: 15px; margin-bottom: 20px; text-align: center; }
+        .custom-file-upload { display: inline-block; padding: 10px 20px; cursor: pointer; background: #0056b3; color: white; font-weight: bold; font-size: 13px; border-radius:4px; }
+        .preview-container { margin-top: 10px; font-size: 13px; }
 
         /* Buttons */
-        button {
-            font-family: 'Rajdhani', sans-serif;
-            letter-spacing: 0.5px;
-            transition: all 0.3s ease;
-        }
-        .btn-logout, .btn-password, .btn-submit, .btn-resume, .btn-export, .btn-edit, .btn-delete {
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        .btn-logout { background: rgba(220, 38, 38, 0.1); color: var(--danger); border: 1px solid var(--danger); padding: 6px 12px; font-size: 12px; }
-        .btn-logout:hover { background: var(--danger); color: #fff; box-shadow: 0 0 5px var(--danger); }
+        .btn-group { display: flex; justify-content: center; gap: 15px; margin-top: 30px; }
+        .btn { padding: 14px 30px; color: white; border: none; font-size: 15px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-submit { background-color: var(--primary); }
+        .btn-print { background-color: var(--success); }
+        .btn-danger-sm { background-color: var(--danger); color: white; border: none; padding: 6px 12px; cursor: pointer; font-size: 12px; font-weight:bold; }
+        .btn-view-sm { background-color: var(--primary); color: white; border: none; padding: 6px 12px; cursor: pointer; font-size: 12px; font-weight:bold; }
         
-        .btn-password { background: rgba(0, 136, 204, 0.1); color: var(--neon-cyan); border: 1px solid var(--neon-cyan); padding: 6px 12px; font-size: 12px; }
-        .btn-password:hover { background: var(--neon-cyan); color: #fff; box-shadow: 0 0 5px var(--neon-cyan); }
-        
-        .btn-submit {
-            background: linear-gradient(90deg, #33AADD, #0088CC);
-            color: #FFFFFF;
-            font-size: 15px;
-            padding: 12px 24px;
-            width: 100%;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        /* Tombol Set Waktu Otomatis */
+        .btn-time { 
+            background-color: var(--primary); 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            padding: 6px 8px; 
+            font-size: 12px; 
+            margin-left: 5px;
+            font-weight: bold;
         }
-        .btn-submit:hover { box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); transform: translateY(-2px); }
-        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-time:hover { background-color: #004494; }
 
-        .btn-resume { background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid var(--warning); padding: 6px 12px; font-size: 12px; }
-        .btn-resume:hover { background: var(--warning); color: #fff; box-shadow: 0 0 5px var(--warning); }
-        
-        .btn-export { background: rgba(22, 163, 74, 0.1); color: var(--success); border: 1px solid var(--success); padding: 8px 16px; font-size: 13px; }
-        .btn-export:hover { background: var(--success); color: #fff; box-shadow: 0 0 5px var(--success); }
+        /* History Table */
+        .history-table { width: 100%; border-collapse: collapse; margin-top: 15px; border: 1px solid #000; }
+        .history-table th, .history-table td { border: 1px solid #000; padding: 12px; text-align: left; font-size: 13px; color:#000; }
+        .history-table th { background: #e2e8f0; color: #000; font-weight:bold; }
 
-        .btn-edit { background: rgba(0, 136, 204, 0.15); color: var(--neon-cyan); border: 1px solid var(--neon-cyan); padding: 4px 8px; font-size: 10px; margin-top: 6px; }
-        .btn-edit:hover { background: var(--neon-cyan); color: #fff; box-shadow: 0 0 4px var(--neon-cyan); }
+        /* MODAL PREVIEW ARSIP */
+        #arsipViewerModal { display: none; background: #fff; padding: 20px; border: 2px solid #000; margin-top: 10px; }
+        .arsip-top-bar { display: flex; justify-content: space-between; align-items: center; background: #e2e8f0; color: #000; padding: 12px 20px; margin-bottom: 20px; border: 1px solid #000; flex-wrap: wrap; gap:10px; }
 
-        .btn-delete { background: rgba(220, 38, 38, 0.15); color: var(--danger); border: 1px solid var(--danger); padding: 4px 8px; font-size: 10px; margin-top: 6px; margin-left: 4px; }
-        .btn-delete:hover { background: var(--danger); color: #fff; box-shadow: 0 0 4px var(--danger); }
-
-        /* Header Dokumen & Penyesuaian Logo */
-        .header-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; border-bottom: 2px solid var(--glass-border); }
-        .logo-container-login img { width: 110px; height: auto; margin: 0 auto 15px; display: block; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); }
-        .logo-container-app img { width: 90px; height: auto; border-radius: 6px; display: block; margin: 0 auto; }
-        .company-title { font-size: 24px; font-weight: 700; color: var(--neon-cyan); text-transform: uppercase; letter-spacing: 1px; }
-        .company-subtitle { font-size: 12px; color: var(--text-muted); padding-bottom: 12px; }
-        .doc-meta-right { text-align: right; font-size: 13px; color: var(--text-muted); padding-bottom: 12px; }
-        .main-title { text-align: center; font-size: 20px; font-weight: 700; color: var(--text-main); text-transform: uppercase; margin: 20px 0 30px 0; letter-spacing: 2px; }
+        #areaSuntikLaporanBeku { width: 100%; box-sizing: border-box; }
+        #areaSuntikLaporanBeku table.form-table { width: 100%; }
+        #areaSuntikLaporanBeku th, #areaSuntikLaporanBeku td { font-size: 10px; padding: 4px; }
         
-        /* Form Inputs */
-        h2 { font-size: 16px; font-weight: 600; color: var(--neon-cyan); text-transform: uppercase; border-left: 4px solid var(--neon-cyan); padding-left: 10px; text-shadow: 0 1px 1px rgba(0, 0, 0, 0.05); }
-        .kpi-title { color: var(--gold); border-left-color: var(--gold); text-shadow: 0 1px 1px rgba(0, 0, 0, 0.05); }
-        
-        .form-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
-        .form-table td { padding: 12px 10px; vertical-align: middle; }
-        .label-cell { width: 30%; font-size: 15px; font-weight: 600; color: var(--text-main); }
-        
-        .form-control {
-            width: 100%;
-            height: 42px;
-            padding: 8px 15px;
-            font-size: 14px;
-            font-family: 'Rajdhani', sans-serif;
-            color: var(--text-main); 
-            background-color: var(--input-bg);
-            border: 1px solid #E2E8F0; 
-            border-radius: 6px;
-            transition: all 0.3s;
-        }
-        .form-control:focus { outline: none; border-color: var(--neon-cyan); box-shadow: 0 0 5px rgba(0, 136, 204, 0.2); background-color: #FFFFFF; }
-        .form-control::placeholder { color: var(--text-muted); }
-        .form-control option { background-color: #FFFFFF; color: var(--text-main); }
-        .form-control[readonly], select[readonly] { background-color: #F8FAFC; border-color: #E2E8F0; color: var(--text-muted); cursor: not-allowed; }
-        textarea.form-control { height: auto; min-height: 90px; resize: vertical; }
-        
-        /* Inline Tables */
-        .target-time-table { width: 100%; border-collapse: collapse; }
-        .target-time-table td { padding: 0 10px 0 0; width: 50%; }
-        .inline-label { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-bottom: 6px; display: block; }
-        
-        /* Dashboard & History Areas */
-        .dashboard-container, .history-container, .pending-container { 
-            margin-top: 30px; 
-            padding: 25px; 
-        }
-        
-        /* Table Responsive Wrapper */
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            margin-top: 15px;
+        /* ATURAN TEGAS UNTUK MODE ARSIP (BEKU) */
+        #areaSuntikLaporanBeku input,
+        #areaSuntikLaporanBeku textarea,
+        #areaSuntikLaporanBeku div {
+            color: #000000 !important;
+            -webkit-text-fill-color: #000000 !important;
+            opacity: 1 !important;
+            font-weight: 900 !important;
+            background-color: transparent !important;
         }
 
-        .history-table { width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap; }
-        .history-table th, .history-table td { border: 1px solid #E2E8F0; padding: 10px; text-align: left; }
-        .history-table th { background-color: #F8FAFC; color: var(--text-main); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
-        .kpi-table th { background-color: rgba(202, 138, 4, 0.05); color: var(--gold); }
-        .history-table tr { background-color: #FFFFFF; transition: 0.2s; }
-        .history-table tr:hover { background-color: #F1F5F9; }
-        
-        .history-controls { display: flex; justify-content: space-between; align-items: center; gap: 15px; }
-        .search-input { width: 300px; }
-        
-        .status-badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
-        .status-danger { background: rgba(220, 38, 38, 0.1); color: var(--danger); border: 1px solid var(--danger); }
-        .status-good { background: rgba(22, 163, 74, 0.1); color: var(--success); border: 1px solid var(--success); }
-        .status-kpi { background: rgba(202, 138, 4, 0.1); color: var(--gold); border: 1px solid var(--gold); }
+        #areaSuntikLaporanBeku input { border: none; border-bottom: 1px solid #000; background: transparent; width:100%; }
 
-        /* Modal */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(2px); overflow-y: auto;}
-        .modal-content { background-color: #FFFFFF; margin: 5vh auto; padding: 30px; border: 1px solid #E2E8F0; border-radius: 12px; width: 90%; max-width: 400px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); }
-        .close-modal { float: right; font-size: 28px; font-weight: bold; cursor: pointer; color: var(--text-muted); line-height: 1; margin-top: -10px; }
-        .close-modal:hover { color: var(--danger); }
-
-        /* =========================================
-           MEDIA QUERIES (RESPONSIVE CONFIG)
-           ========================================= */
-        @media (max-width: 768px) {
-            body { padding: 10px; }
-            .form-wrapper, .login-wrapper { padding: 20px 15px; }
+        /* ATURAN PENCETAKAN KERTAS ASLI (CTRL+P) */
+        @media print {
+            @page { size: A4 portrait; margin: 8mm; }
+            body { 
+                background: #fff !important; padding: 0 !important; color: #000 !important; 
+                font-size: 10px !important; 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important; 
+            }
+            * { color: #000 !important; border-color: #000 !important; text-shadow: none !important; }
             
-            .live-clock-container { flex-direction: column; gap: 15px; text-align: center; }
-            .header-controls { width: 100%; justify-content: center; flex-wrap: wrap; }
-            .header-controls button { flex: 1; min-width: 120px; }
+            table.form-table th, .header-title, .box-ttd-header, .box-saran-title, .box-header, .kop-surat, td[style*="background"] { 
+                background-color: #e2e8f0 !important; 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important; 
+            }
             
-            .header-table tr, .header-table td { display: block; text-align: center; padding-right: 0; }
-            .logo-container-app img { margin-bottom: 15px; }
-            .doc-meta-right { text-align: center; padding-top: 10px; border-top: 1px solid #E2E8F0; margin-top: 10px; }
+            table.form-table td, .form-box, .checkbox-group, .box-saran, .box-ttd-group { border: 1px solid #000 !important; }
             
-            .form-table td { display: block; width: 100%; padding: 6px 0; }
-            .label-cell { color: var(--neon-cyan); font-size: 14px; margin-bottom: 2px; }
+            #mainReportForm, .nav-tabs, .arsip-top-bar, #tempatLinkDriveSukses, .btn-time { display: none !important; }
+            #arsipViewerModal { display: block !important; border: none !important; padding: 0 !important; margin: 0 !important; width: 100% !important; }
+            .table-responsive { border: none !important; overflow: visible !important; width: 100% !important; margin-bottom: 10px !important; }
+            table { page-break-inside: auto !important; }
+            tr { page-break-inside: avoid !important; page-break-after: auto !important; }
+            thead { display: table-header-group !important; }
             
-            .target-time-table td { display: block; width: 100%; padding: 0; margin-bottom: 10px; }
+            .canvas-container { border: none !important; height: auto !important; margin-bottom:2px !important;}
+            .canvas-container img { max-height: 48px !important; }
             
-            .history-controls { flex-direction: column; width: 100%; }
-            .search-input, .btn-export { width: 100%; }
+            input, textarea, .signer-name { 
+                background: transparent !important; 
+                border-bottom: 1px solid #000 !important; 
+                color: #000000 !important; 
+                -webkit-text-fill-color: #000000 !important;
+                opacity: 1 !important;
+                font-weight: 900 !important;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="login-wrapper glass-panel" id="login-section">
-    <div class="login-title">
-        <div class="logo-container-login">
-            <a href="https://imgbb.com/"><img src="https://i.ibb.co.com/PzM0Lypb/logo-tirta-teknosys-1.jpg" alt="logo tirta teknosys" border="0"></a>
+<div class="container" id="mainReportForm">
+    
+    <div class="kop-surat" id="kopSuratArea">
+        <div class="kop-logo">
+            <img src="https://i.ibb.co.com/hFN7jbNh/logo-tirta-teknosys-1.jpg" alt="Logo Tirta Teknosys">
         </div>
-        SYSTEM LOGIN
-    </div>
-    <div class="login-subtitle">
-        Selamat Datang!<br>
-        Silakan masukkan kata sandi unik Anda untuk masuk ke sistem.
-    </div>
-    <form id="loginForm" onsubmit="handleLogin(event)">
-        <div style="margin-bottom: 25px; text-align: left;">
-            <label style="font-size:13px; font-weight:600; color: var(--text-muted); text-transform: uppercase;">Kata Sandi Operator</label>
-            <input type="password" class="form-control" id="login_password" placeholder="Ketik kata sandi di sini..." required>
+        <div class="kop-title">
+            <h2 id="judulKopDinamic">PORTAL LAPORAN HARIAN TEKNISI</h2>
+            <div class="realtime-clock" id="clockDisplay">Memuat waktu...</div>
         </div>
-        <button type="submit" class="btn-submit">INISIALISASI SISTEM</button>
-    </form>
-</div>
-
-<div id="passwordModal" class="modal">
-    <div class="modal-content">
-        <span class="close-modal" onclick="closePasswordModal()">&times;</span>
-        <h3 style="margin-top:0; color:var(--neon-cyan); border-bottom: 1px solid var(--glass-border); padding-bottom:10px; text-transform:uppercase; font-size: 18px;">Ubah Sandi</h3>
-        <form onsubmit="updatePassword(event)">
-            <div style="margin-bottom: 12px;">
-                <label style="font-size:12px; font-weight:600; color:var(--text-muted);">Sandi Lama</label>
-                <input type="password" class="form-control" id="old_password" required>
-            </div>
-            <div style="margin-bottom: 12px;">
-                <label style="font-size:12px; font-weight:600; color:var(--text-muted);">Sandi Baru</label>
-                <input type="password" class="form-control" id="new_password" required minlength="5">
-            </div>
-            <div style="margin-bottom: 25px;">
-                <label style="font-size:12px; font-weight:600; color:var(--text-muted);">Konfirmasi Sandi Baru</label>
-                <input type="password" class="form-control" id="confirm_password" required minlength="5">
-            </div>
-            <button type="submit" class="btn-submit" id="btn-update-password" style="background: linear-gradient(90deg, #16A34A, #1dd1a1); color: #fff;">SIMPAN SANDI BARU</button>
-        </form>
-    </div>
-</div>
-
-<div id="editHistoryModal" class="modal">
-    <div class="modal-content" style="max-width: 500px;">
-        <span class="close-modal" onclick="closeEditHistoryModal()">&times;</span>
-        <h3 style="margin-top:0; color:var(--warning); border-bottom: 1px solid var(--glass-border); padding-bottom:10px; text-transform:uppercase; font-size: 18px;">
-            ⚙️ Edit Data Histori
-        </h3>
-        <form onsubmit="submitEditHistory(event)">
-            <input type="hidden" id="edit_key">
-            
-            <div style="margin-bottom: 12px;">
-                <label style="font-size:12px; font-weight:600; color:var(--text-muted);">No. SPP</label>
-                <input type="text" class="form-control" id="edit_spp" required>
-            </div>
-            <div style="margin-bottom: 12px;">
-                <label style="font-size:12px; font-weight:600; color:var(--text-muted);">Nama Produk</label>
-                <input type="text" class="form-control" id="edit_produk" required>
-            </div>
-            <div style="margin-bottom: 12px;">
-                <label style="font-size:12px; font-weight:600; color:var(--text-muted);">Kategori Pekerjaan</label>
-                <select class="form-control" id="edit_kategori" required>
-                    <option value="Reguler">Reguler</option>
-                    <option value="Buffer">Buffer</option>
-                    <option value="Emergency">Emergency</option>
-                    <option value="Other">Lainnya (Other)</option>
-                </select>
-            </div>
-            <div style="margin-bottom: 12px;">
-                <label style="font-size:12px; font-weight:600; color:var(--text-muted);">Status Kerja</label>
-                <select class="form-control" id="edit_status" required>
-                    <option value="Idle Time">Idle Time</option>
-                    <option value="Stoppage">Stoppage</option>
-                    <option value="Takeover">Takeover</option>
-                    <option value="Selesai Awal">Selesai Awal</option>
-                    <option value="Selesai Tepat Waktu">Selesai Tepat Waktu</option>
-                    <option value="Lanjutkan Besok">Lanjutkan Besok</option>
-                    <option value="Lembur (Reguler) - 4 Jam">Lembur (Reguler) - 4 Jam</option>
-                    <option value="Lembur (Sabtu/Minggu) - 9 Jam">Lembur (Sabtu/Minggu) - 9 Jam</option>
-                    <option value="Other">Lainnya (Other)</option>
-                </select>
-            </div>
-            <div style="margin-bottom: 12px;">
-                <label style="font-size:12px; font-weight:600; color:var(--text-muted);">Estimasi Waktu Standar</label>
-                <input type="text" class="form-control" id="edit_stdwaktu">
-            </div>
-            <div style="margin-bottom: 12px;">
-                <label style="font-size:12px; font-weight:600; color:var(--text-muted);">Catatan / Alasan Khusus</label>
-                <input type="text" class="form-control" id="edit_alasan">
-            </div>
-            <div style="margin-bottom: 25px;">
-                <label style="font-size:12px; font-weight:600; color:var(--text-muted);">Log / Uraian Pekerjaan</label>
-                <textarea class="form-control" id="edit_uraian" style="min-height: 60px;"></textarea>
-            </div>
-            <button type="submit" class="btn-submit" id="btn-save-edit" style="background: linear-gradient(90deg, #CA8A04, #f1c40f); color: #fff;">UBAH DATABASE</button>
-        </form>
-    </div>
-</div>
-
-<div class="form-wrapper glass-panel d-none" id="main-app">
-    <div class="live-clock-container">
-        <div class="header-controls">
-            <span id="header_operator_name" style="color: var(--text-main); font-size: 14px;">[ID: Operator]</span>
-            <button class="btn-password" onclick="openPasswordModal()">Ubah Sandi</button>
-            <button class="btn-logout" onclick="handleLogout()">Logout</button>
+        <div class="kop-meta">
+            <div>No. Dokumen : <span id="docPrefix">TT.F.TEC.</span><span id="docNumberDisplay">001</span></div>
+            <div>No. Revisi : <span id="kopNoRev">02</span></div>
+            <div>Tgl. Berlaku : <span id="kopTglBerlaku">21/06/2027</span></div>
         </div>
-        <span id="live_clock" style="font-family: monospace; font-size: 14px;">Memuat sinkronisasi waktu...</span>
-    </div>
-
-    <table class="header-table">
-        <tr>
-            <td style="width: 120px; vertical-align: middle; padding-bottom: 12px; padding-right: 10px; text-align: center;">
-                <div class="logo-container-app">
-                    <a href="https://imgbb.com/"><img src="https://i.ibb.co.com/PzM0Lypb/logo-tirta-teknosys-1.jpg" alt="logo tirta teknosys" border="0"></a>
-                </div>
-            </td>
-            <td style="vertical-align: middle;">
-                <div class="company-title">PT Tirta Teknosys</div>
-                <div class="company-subtitle">Water Treatment Plant, IPAL, Water Recycle & Healthcare Systems</div>
-            </td>
-            <td class="doc-meta-right" style="vertical-align: bottom;">
-                <strong>No. Formulir:</strong> <span id="form_no_display" style="color:var(--neon-cyan); font-weight:700;">FM-PRD-AKT-TT-01</span><br>
-                <strong>Revisi:</strong> 00<br>
-                <strong>Halaman:</strong> 1 dari 1
-            </td>
-        </tr>
-    </table>
-
-    <div class="main-title">Input Aktual Produksi</div>
-
-    <form id="produksiForm" onsubmit="saveToHistory(event)">
-        <h2>Data Administrasi</h2>
-        <table class="form-table">
-            <tr>
-                <td class="label-cell">No. SPP Aktif</td>
-                <td class="input-cell"><input type="text" class="form-control" name="no_spp" id="no_spp" placeholder="Scan/Input No. SPP" required></td>
-            </tr>
-            
-            <tr>
-                <td class="label-cell">Nama Produk</td>
-                <td class="input-cell">
-                    <select class="form-control" name="nama_produk" id="nama_produk" onchange="updateProductData()" required>
-                        <option value="">-- Pilih Parameter Produk --</option>
-                    </select>
-                </td>
-            </tr>
-            <tr id="row_manual_produk" class="hidden">
-                <td class="label-cell" style="font-size: 12px; color: var(--warning);">↳ Ketik Nama Produk:</td>
-                <td class="input-cell"><input type="text" class="form-control" id="manual_nama_produk" placeholder="Input Nama Produk Manual"></td>
-            </tr>
-            
-            <tr>
-                <td class="label-cell">No. Produksi</td>
-                <td class="input-cell"><input type="text" class="form-control" name="no_produksi" id="no_produksi" placeholder="Input Serial / Nomor Produksi (Opsional)"></td>
-            </tr>
-            
-            <tr>
-                <td class="label-cell">Kategori Pekerjaan</td>
-                <td class="input-cell">
-                    <select class="form-control" name="kategori_pekerjaan" id="kategori_pekerjaan" onchange="toggleManualOption(this, 'row_manual_kategori', 'manual_kategori')" required>
-                        <option value="Reguler">Reguler</option>
-                        <option value="Buffer">Buffer</option>
-                        <option value="Emergency">Emergency</option>
-                        <option value="Other">Lainnya (Other)</option>
-                    </select>
-                </td>
-            </tr>
-            <tr id="row_manual_kategori" class="hidden">
-                <td class="label-cell" style="font-size: 12px; color: var(--warning);">↳ Ketik Kategori Manual:</td>
-                <td class="input-cell"><input type="text" class="form-control" id="manual_kategori" placeholder="Input Kategori Lainnya"></td>
-            </tr>
-        </table>
-
-        <h2>Target Kalibrasi Standar</h2>
-        <table class="form-table">
-            <tr>
-                <td class="label-cell">Parameter Standar</td>
-                <td class="input-cell">
-                    <table class="target-time-table">
-                        <tr>
-                            <td>
-                                <span class="inline-label">Standar Manpower</span>
-                                <input type="text" class="form-control" id="std_operator" placeholder="Auto-kalkulasi" readonly>
-                            </td>
-                            <td>
-                                <span class="inline-label">Estimasi Waktu (Jam)</span>
-                                <input type="text" class="form-control" id="std_waktu" placeholder="Auto-kalkulasi" readonly>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-        </table>
-
-        <h2>Status Eksekusi Lapangan</h2>
-        <table class="form-table">
-            <tr>
-                <td class="label-cell">Sinkronisasi Waktu</td>
-                <td class="input-cell"><input type="text" class="form-control" name="waktu_update" id="waktu_update" readonly required style="cursor: not-allowed; background-color: #F8FAFC; color: var(--text-main);"></td>
-            </tr>
-            
-            <tr>
-                <td class="label-cell">Status Sistem Kerja</td>
-                <td class="input-cell">
-                    <select class="form-control" name="kondisi_kerja" id="kondisi_kerja" onchange="toggleManualOption(this, 'row_manual_kondisi', 'manual_kondisi')">
-                        <option value="Idle Time">Idle Time (Tugas Lain)</option>
-                        <option value="Stoppage">Stoppage (Material Kurang)</option>
-                        <option value="Takeover">Takeover (Overhandle)</option>
-                        <option value="Other" class="opt-other">Lainnya (Other)</option>
-                    </select>
-                </td>
-            </tr>
-            <tr id="row_manual_kondisi" class="hidden">
-                <td class="label-cell" style="font-size: 12px; color: var(--warning);">↳ Ketik Status Manual:</td>
-                <td class="input-cell"><input type="text" class="form-control" id="manual_kondisi" placeholder="Input Status Lainnya"></td>
-            </tr>
-            
-            <tr>
-                <td class="label-cell">Fase Produksi</td>
-                <td class="input-cell">
-                    <select class="form-control" name="tahap_produksi" id="tahap_produksi" onchange="toggleManualOption(this, 'row_manual_tahap', 'manual_tahap')">
-                        <option value="1. Persiapan Material">[Fase 1] Persiapan Material</option>
-                        <option value="2. Perakitan Frame">[Fase 2] Perakitan Frame</option>
-                        <option value="3. Proses Cat / Finishing">[Fase 3] Proses Cat / Finishing</option>
-                        <option value="4. Instalasi Membran/Housing">[Fase 4] Instalasi Membran/Housing</option>
-                        <option value="5. Kelistrikan & Panel">[Fase 5] Kelistrikan & Panel</option>
-                        <option value="6. Running Test & QC">[Fase 6] Running Test & QC</option>
-                        <option value="7. Packing & Selesai (Final)">[Fase 7] Packing & Selesai (Final)</option>
-                        <option value="Other">Fase Lainnya (Other)</option>
-                    </select>
-                </td>
-            </tr>
-            <tr id="row_manual_tahap" class="hidden">
-                <td class="label-cell" style="font-size: 12px; color: var(--warning);">↳ Ketik Fase Manual:</td>
-                <td class="input-cell"><input type="text" class="form-control" id="manual_tahap" placeholder="Input Fase Lainnya"></td>
-            </tr>
-            
-            <tr>
-                <td class="label-cell">Log Pekerjaan</td>
-                <td class="input-cell"><textarea class="form-control" id="uraian_pekerjaan" placeholder="Deskripsikan proses eksekusi..." required></textarea></td>
-            </tr>
-            <tr>
-                <td class="label-cell">Bukti Visual (Upload)</td>
-                <td class="input-cell">
-                    <input type="file" class="form-control" id="foto_aktual" accept="image/*" capture="environment" style="padding-top:7px; font-size:12px;">
-                </td>
-            </tr>
-        </table>
-
-        <div style="margin-top: 15px;">
-            <button type="submit" class="btn-submit" id="btn-submit-form">SUBMIT DATA PRODUKSI</button>
-        </div>
-    </form>
-
-    <div class="dashboard-container glass-panel" id="dashboardContainer">
-        <h2>📊 Metrik Kinerja Operator</h2>
-        <div class="table-responsive">
-            <table class="history-table" id="dashboardTable">
-                <thead>
-                    <tr>
-                        <th>ID Operator</th>
-                        <th>Output Produk</th>
-                        <th>Akumulasi Waktu</th>
-                        <th>Status Indikator</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Sistem belum menerima data metrik.</td></tr>
-                </tbody>
-            </table>
+        <div class="kop-flag">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/9/9f/Flag_of_Indonesia.svg" alt="Bendera Indonesia">
         </div>
     </div>
     
-    <div class="dashboard-container glass-panel kpi-panel hidden" id="kpiDashboardContainer">
-        <h2 class="kpi-title">🏆 Dashboard KPI & Evaluasi (Khusus Eksekutif)</h2>
-        <p style="font-size:12px; color:var(--text-muted); margin-top:-10px; margin-bottom:15px;">
-            *Penilaian: Tepat Waktu = 100 | Selesai Awal = 110 | Terlambat(Lembur) = 80 | Penalti Jumlah Pekerja = -15 Poin/Kelebihan Orang | Bonus Hemat Pekerja = +10 Poin.
-        </p>
-        <div class="table-responsive">
-            <table class="history-table kpi-table" id="kpiTable">
-                <thead>
-                    <tr>
-                        <th>Nama Operator</th>
-                        <th>Total SPP Selesai</th>
-                        <th>Selesai Awal (+Bonus)</th>
-                        <th>Tepat Waktu (Standar)</th>
-                        <th>Lembur (Terlambat)</th>
-                        <th>SKOR RATA-RATA</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-        </div>
+    <div class="nav-tabs">
+        <button class="active" onclick="openTab(event, 'techReport', 'tech')">Technical Report</button>
+        <button onclick="openTab(event, 'serviceReport', 'service')">Service Report</button>
+        <button class="btn-history" onclick="openTab(event, 'historyTab', 'history')">📜 Histori & Cetak PDF</button>
     </div>
 
-    <div class="pending-container glass-panel hidden" id="pendingContainer">
-        <h2>⚠️ Antrean Tugas Tertunda</h2>
-        <div class="table-responsive">
-            <table class="history-table" id="pendingTable">
-                <thead>
-                    <tr>
-                        <th>ID SPP</th>
-                        <th>Parameter Produk</th>
-                        <th>Operator Terakhir</th>
-                        <th>Status Terakhir</th>
-                        <th>Tindakan</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
+    <div id="techReport" class="tab-content active">
+        <div class="header-title">TECHNICAL REPORT</div>
+        <div class="grid-2">
+            <div>
+                <div class="form-group"><label>No. Surat Tugas:</label><input type="text" id="tr_st"></div>
+                <!-- TANGGAL DIKUNCI READONLY UNTUK MENCEGAH MANIPULASI -->
+                <div class="form-group"><label>Tanggal:</label><input type="text" id="tr_tgl" readonly placeholder="Otomatis terisi saat Submit"></div>
+                <div class="form-group"><label>Nama Pelanggan:</label><input type="text" id="tr_cust" placeholder="PT / Rumah Sakit / Klien..."></div>
+                <div class="form-group"><label>Alamat:</label><input type="text"></div>
+                <div class="form-group"><label>Kontak:</label><div class="form-group-split"><div class="form-group"><label>Tlp:</label><input type="text"></div><div class="form-group"><label>Fax:</label><input type="text"></div></div></div>
+            </div>
+            <div class="form-box">
+                <div class="form-group"><label>Nama Teknisi 1:</label><input type="text" placeholder="Nama Teknisi Utama"></div>
+                <div class="form-group"><label>Nama Teknisi 2:</label><input type="text" placeholder="Rekan (Opsional)"></div>
+                <div class="form-group"><label>Jenis Pekerjaan:</label><input type="text" placeholder="Maintenance / Trouble"></div>
+            </div>
+        </div>
+
+        <div class="grid-3">
+            <div class="checkbox-group">
+                <div class="box-header">Pekerjaan</div>
+                <label class="checkbox-label"><input type="checkbox"> Survey</label>
+                <label class="checkbox-label"><input type="checkbox"> Service</label>
+                <label class="checkbox-label"><input type="checkbox"> Instalasi</label>
+            </div>
+            <div class="checkbox-group">
+                <div class="box-header">Jenis Unit</div>
+                <div class="grid-2" style="margin-bottom:0; gap:5px;">
+                    <div><label class="checkbox-label"><input type="checkbox"> RO</label><label class="checkbox-label"><input type="checkbox"> Filter</label><label class="checkbox-label"><input type="checkbox"> UV</label></div>
+                    <div><label class="checkbox-label"><input type="checkbox"> WWTP</label><label class="checkbox-label"><input type="checkbox"> Ozon</label><label class="checkbox-label"><input type="checkbox"> Lain</label></div>
+                </div>
+            </div>
+            <div class="checkbox-group" style="display: flex; flex-direction: column;">
+                <div class="box-header">Sistem Terpasang</div>
+                <textarea rows="3" placeholder="Ketik sistem yang terpasang..." style="flex:1; border:none; outline:none; font-family:inherit; font-size:13px; resize:none;"></textarea>
+            </div>
+        </div>
+
+        <div class="table-responsive" style="margin-bottom: 20px;">
+            <table class="form-table">
+                <thead><tr><th width="8%">No</th><th width="45%">Part Yang Diganti (Nama Barang)</th><th width="35%">Spesifikasi</th><th width="12%">Qty</th></tr></thead>
+                <tbody id="tbody-tech-parts"></tbody>
             </table>
         </div>
-    </div>
 
-    <div class="history-container glass-panel">
-        <h2>Log Rekam Jejak (Histori)</h2>
+        <!-- TAMBAHAN ATRIBUT MULTIPLE -->
+        <div class="live-upload-card"><h4 style="margin:0 0 8px 0; color:var(--primary);">📸 Lampiran Foto Data (Tampil di Histori)</h4><label class="custom-file-upload">📷 Pilih Banyak Foto<input type="file" accept="image/*" capture="environment" multiple style="display:none;" onchange="uploadGeneralPic(this, 'Foto_Technical', 'previewTech')"></label><div id="previewTech" class="preview-container"></div></div>
+
+        <div class="form-box" style="margin-bottom: 15px; padding-bottom: 5px;">
+            <div class="box-header">Uraian / Kronologis Pekerjaan</div>
+            <textarea rows="4" style="width:100%; border:none; outline:none; resize:none; font-family:inherit; font-size:14px; font-weight:800; color:#000;"></textarea>
+        </div>
+
+        <div class="form-box" style="margin-bottom: 20px; padding-bottom: 5px;">
+            <div class="box-header">Hasil Terakhir Pengerjaan</div>
+            <textarea rows="2" style="width:100%; border:none; outline:none; resize:none; font-family:inherit; font-size:14px; font-weight:800; color:#000;"></textarea>
+        </div>
+
+        <div class="grid-2" style="align-items: stretch;">
+            <div class="form-box">
+                <div class="box-header">Waktu Operasional & Tujuan</div>
+                <div class="form-group"><label>Jam Berangkat:</label><input type="time" id="tr_jam_berangkat"><button type="button" class="btn-time" onclick="setWaktuSekarang('tr_jam_berangkat')">⏰ Set</button></div>
+                <div class="form-group"><label>Jam Tiba:</label><input type="time" id="tr_jam_tiba"><button type="button" class="btn-time" onclick="setWaktuSekarang('tr_jam_tiba')">⏰ Set</button></div>
+                <div class="form-group"><label>Jam Selesai:</label><input type="time" id="tr_jam_selesai"><button type="button" class="btn-time" onclick="setWaktuSekarang('tr_jam_selesai')">⏰ Set</button></div>
+                
+                <div class="form-group" style="margin-bottom:0; margin-top:10px; border-top:1px dashed #000; padding-top:10px;">
+                    <label>Tujuan Selesai:</label>
+                    <div style="display:flex; gap:10px; align-items:center; flex:1;">
+                        <label style="cursor:pointer; font-weight:800; color:#000;"><input type="radio" name="tr_status_pulang" value="Pulang" onclick="document.getElementById('tr_tujuan_lanjut').style.display='none'"> Pulang</label>
+                        <label style="cursor:pointer; font-weight:800; color:#000;"><input type="radio" name="tr_status_pulang" value="Lanjut cust" onclick="document.getElementById('tr_tujuan_lanjut').style.display='inline-block'"> Lanjut Cust</label>
+                        <input type="text" id="tr_tujuan_lanjut" placeholder="Nama Klien..." style="display:none; flex:1; padding:4px 8px; border:1px solid #000; font-size:13px; font-weight:800;">
+                    </div>
+                </div>
+            </div>
+            <div class="form-box" style="display: flex; flex-direction: column;">
+                <div class="box-header">Catatan / Saran Pelanggan</div>
+                <textarea id="tr_saran" rows="4" style="flex:1; width:100%; border:none; outline:none; resize:none; font-family:inherit; font-size:14px; font-weight:800; color:#000;"></textarea>
+            </div>
+        </div>
+
+        <div class="bottom-layout" style="margin-top:25px;">
+            <div class="box-ttd-group" style="width:100%;">
+                <div class="box-ttd-header"><div style="flex:2; border-right:1px solid #000;">PT TIRTA TEKNOSYS</div><div style="flex:1;">PELANGGAN</div></div>
+                <div class="box-ttd-body">
+                    <div class="ttd-item"><div class="canvas-container"><canvas class="sig-canvas" id="canvas-tech-teknisi" width="140" height="65"></canvas><button class="btn-clear-sig" onclick="clearCanvas('canvas-tech-teknisi')">Hapus</button></div><input type="text" class="signer-name" placeholder="Nama Teknisi"><div class="ttd-label">Teknisi</div></div>
+                    <div class="ttd-item"><div class="canvas-container"><canvas class="sig-canvas" id="canvas-tech-leader" width="140" height="65"></canvas><button class="btn-clear-sig" onclick="clearCanvas('canvas-tech-leader')">Hapus</button></div><input type="text" class="signer-name" placeholder="Nama Leader"><div class="ttd-label">Leader Teknisi</div></div>
+                    <div class="ttd-item"><div class="canvas-container"><canvas class="sig-canvas" id="canvas-tech-pelanggan" width="140" height="65"></canvas><button class="btn-clear-sig" onclick="clearCanvas('canvas-tech-pelanggan')">Hapus</button></div><input type="text" class="signer-name" placeholder="Nama Pelanggan"><div class="ttd-label">Pelanggan</div></div>
+                </div>
+            </div>
+        </div>
         
-        <div class="history-controls">
-            <input type="text" id="searchInput" class="form-control search-input" onkeyup="searchTable()" placeholder="🔍 Ekstrak data (Ketik ID, Produk, SPP...)">
-            <button class="btn-export" onclick="exportToExcel()">UNDUH DATABASE (.XLS)</button>
+        <div class="btn-group"><button class="btn btn-submit" onclick="simpanLaporanBeku('Technical', 'techReport', event)">💾 SIMPAN KE SERVER</button></div>
+    </div>
+
+    <div id="serviceReport" class="tab-content">
+        <div class="header-title" style="display:none;">SERVICE REPORT</div>
+
+        <div class="table-responsive" style="margin-bottom: 15px;">
+            <table class="form-table">
+                <tr>
+                    <td width="35%"><b>Tanggal</b> : <input type="text" id="sr_tgl" class="table-input" style="width:70%; display:inline-block;" readonly placeholder="Otomatis Terisi"></td>
+                    <td width="35%"><b>Tipe RO terpasang</b> : <input type="text" class="table-input" style="width:55%; display:inline-block;"></td>
+                    <td width="30%"><b>Berangkat</b> : <input type="time" id="sr_jam_berangkat" class="table-input" style="width:40%; display:inline-block;"><button type="button" class="btn-time" onclick="setWaktuSekarang('sr_jam_berangkat')">⏰</button></td>
+                </tr>
+                <tr>
+                    <td><b>Nama pelanggan</b> : <input type="text" id="sr_cust" class="table-input" style="width:60%; display:inline-block;" placeholder="PT / RS..."></td>
+                    <td><b>Nama PIC pelanggan</b> : <input type="text" class="table-input" style="width:55%; display:inline-block;"></td>
+                    <td><b>Tiba</b> : <input type="time" id="sr_jam_tiba" class="table-input" style="width:40%; display:inline-block;"><button type="button" class="btn-time" onclick="setWaktuSekarang('sr_jam_tiba')">⏰</button></td>
+                </tr>
+                <tr>
+                    <td><b>Alamat</b> : <input type="text" class="table-input" style="width:75%; display:inline-block;"></td>
+                    <td><b>Nama teknisi</b> : <input type="text" class="table-input" style="width:65%; display:inline-block;"></td>
+                    <td><b>Selesai</b> : <input type="time" id="sr_jam_selesai" class="table-input" style="width:40%; display:inline-block;"><button type="button" class="btn-time" onclick="setWaktuSekarang('sr_jam_selesai')">⏰</button></td>
+                </tr>
+                <tr>
+                    <td style="background:#e2e8f0;"></td>
+                    <td><b>No surat tugas</b> : <input type="text" id="sr_st" class="table-input" style="width:65%; display:inline-block; font-weight:900;"></td>
+                    <td style="background:#e2e8f0; vertical-align:top;">
+                        <label style="cursor:pointer; margin-right:10px; font-weight:900; color:#000;"><input type="radio" name="sr_status_pulang" value="Pulang" onclick="document.getElementById('sr_tujuan_lanjut').style.display='none'"> Pulang</label><br>
+                        <label style="cursor:pointer; font-weight:900; color:#000;"><input type="radio" name="sr_status_pulang" value="Lanjut cust" onclick="document.getElementById('sr_tujuan_lanjut').style.display='inline-block'"> Lanjut cust</label><br>
+                        <input type="text" id="sr_tujuan_lanjut" class="table-input" placeholder="Ketik tujuan klien..." style="display:none; width:95%; border-bottom:1px solid #000; margin-top:4px;">
+                    </td>
+                </tr>
+            </table>
         </div>
 
-        <div class="table-responsive">
-            <table class="history-table" id="historyTable">
-                <thead>
-                    <tr>
-                        <th>Kode Form</th>
-                        <th>Timestamp</th>
-                        <th>Operator</th>
-                        <th>ID SPP</th>
-                        <th>Parameter Produk</th>
-                        <th>Kategori</th>
-                        <th>Target Waktu</th>
-                        <th>Status</th>
-                        <th>Catatan Khusus</th>
-                        <th>Log Pekerjaan</th>
-                        <th>Visual</th>
-                    </tr>
-                </thead>
+        <div class="table-responsive" style="margin-bottom: 20px;">
+            <table class="form-table">
+                <thead><tr><th width="5%">No.</th><th width="35%">Part Yang Diganti (Nama Barang)</th><th width="10%">Qty</th><th width="50%">Kronologis / Uraian pekerjaan :</th></tr></thead>
                 <tbody>
+                    <tr>
+                        <td align="center"><b>1</b></td><td><input type="text" class="table-input"></td><td><input type="text" class="table-input" style="text-align:center;"></td>
+                        <td rowspan="5" style="vertical-align: top; padding: 6px;"><textarea rows="7" class="table-area" style="width:100%; height:100%; font-size:13px;" placeholder="Ketikkan uraian kerja..."></textarea></td>
+                    </tr>
+                    <tr><td align="center"><b>2</b></td><td><input type="text" class="table-input"></td><td><input type="text" class="table-input" style="text-align:center;"></td></tr>
+                    <tr><td align="center"><b>3</b></td><td><input type="text" class="table-input"></td><td><input type="text" class="table-input" style="text-align:center;"></td></tr>
+                    <tr><td align="center"><b>4</b></td><td><input type="text" class="table-input"></td><td><input type="text" class="table-input" style="text-align:center;"></td></tr>
+                    <tr><td align="center"><b>5</b></td><td><input type="text" class="table-input"></td><td><input type="text" class="table-input" style="text-align:center;"></td></tr>
                 </tbody>
             </table>
         </div>
+
+        <div class="table-responsive" style="margin-bottom: 15px;">
+            <table class="form-table">
+                <thead><tr><th width="4%">No.</th><th width="16%">Produk</th><th width="26%">Operasional</th><th width="9%">Nilai Sebelum</th><th width="10%">Nilai standar</th><th width="9%">Nilai Sesudah</th><th width="6%">Satuan</th><th width="20%">Catatan / Saran</th></tr></thead>
+                <tbody>
+                    <tr><td align="center" rowspan="3"><b>1.</b></td><td rowspan="3"><b>Pompa Filter</b></td><td>Titik nyala pompa</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>20</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
+                    <tr><td>Titik mati pompa</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>40 - 60</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
+                    <tr><td>Setting & test WLC/pressure</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input"></td></tr>
+
+                    <tr><td align="center" rowspan="3"><b>2.</b></td><td rowspan="3"><b>Pompa Distribusi</b></td><td>Titik nyala pompa</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>20</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
+                    <tr><td>Titik mati pompa</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>30 - 50</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
+                    <tr><td>Setting & test WLC/pressure</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input"></td></tr>
+
+                    <tr><td align="center" rowspan="4"><b>3.</b></td><td rowspan="4"><b>Filter Softener</b></td><td>Tekanan inlet filter</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>30 - 60</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
+                    <tr><td>Tekanan outlet filter</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>30 - 40</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
+                    <tr><td>Backwash</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>2 - 3</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Hari</td><td><input type="text" class="table-input"></td></tr>
+                    <tr><td>Regenerasi</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>2</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Hari</td><td><input type="text" class="table-input"></td></tr>
+
+                    <tr><td align="center" rowspan="3"><b>4.</b></td><td rowspan="3"><b>Filter Carbon</b></td><td>Tekanan inlet filter</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>30 - 60</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
+                    <tr><td>Tekanan outlet filter</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>30 - 40</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
+                    <tr><td>Backwash</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>2 - 3</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Hari</td><td><input type="text" class="table-input"></td></tr>
+
+                    <tr><td align="center" rowspan="13"><b>5.</b></td><td rowspan="13"><b>Reverse Osmosis</b></td><td>Tekanan inlet micron filter</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>30 - 40</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
+                    <tr><td>Tekanan outlet micron filter</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>15 - 40</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
+                    <tr><td>Tekanan operasi</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>100 - 175</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
+                    <tr><td>Tekanan flushing</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>50 - 100</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
+                    <tr><td>Flow product</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Lpm</td><td><input type="text" class="table-input"></td></tr>
+                    <tr><td>Flow reject</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Lpm</td><td><input type="text" class="table-input"></td></tr>
+                    <tr><td>TDS air baku</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>500</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Ppm</td><td><input type="text" class="table-input"></td></tr>
+                    <tr><td>TDS air produk</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>&lt; 15</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Ppm</td><td><input type="text" class="table-input"></td></tr>
+                    <tr><td>Titik tekanan rendah</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>10</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
+                    <tr><td>Titik tekanan tinggi</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>175</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
+                    <tr><td>Penggantian micron filter</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>3</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Bulan</td><td><input type="text" class="table-input"></td></tr>
+                    <tr><td>Penggantian membrane</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>1</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Tahun</td><td><input type="text" class="table-input"></td></tr>
+                    <tr><td>Setting & test WLC</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">-</td><td><input type="text" class="table-input"></td></tr>
+
+                    <tr>
+                        <td align="center"><b>6.</b></td><td><b>Micron Filter<br>(0,22 micron)</b></td><td>Kondisi</td>
+                        <td colspan="4" align="center" style="background:#e2e8f0;"><label style="cursor:pointer; margin-right:15px; font-weight:800; color:#000;"><input type="radio" name="sr_mic_kond" value="Keadaan Bersih"> Keadaan Bersih</label><label style="cursor:pointer; font-weight:800; color:#000;"><input type="radio" name="sr_mic_kond" value="Keadaan Kotor"> Keadaan Kotor</label></td>
+                        <td><input type="text" class="table-input" placeholder="..."></td>
+                    </tr>
+
+                    <tr><td align="center" rowspan="2"><b>7.</b></td><td rowspan="2"><b>Filter mixedbed</b></td><td>Tekanan pada filter</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>20 - 40</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">Psi</td><td><input type="text" class="table-input"></td></tr>
+                    <tr><td>Nilai conductivity</td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center"><b>&lt; 1</b></td><td><input type="text" class="table-input" style="text-align:center;"></td><td align="center">µS</td><td><input type="text" class="table-input"></td></tr>
+
+                    <tr>
+                        <td align="center" rowspan="2"><b>8.</b></td><td rowspan="2"><b>Lampu Ultraviolet</b></td><td>Kondisi lampu</td>
+                        <td colspan="4" align="center" style="background:#e2e8f0;"><label style="cursor:pointer; margin-right:10px; font-weight:800; color:#000;"><input type="radio" name="sr_uv_lmp" value="Ada Penggantian"> Ada Penggantian</label><label style="cursor:pointer; font-weight:800; color:#000;"><input type="radio" name="sr_uv_lmp" value="Tidak Ada Penggantian"> Tidak Ada Penggantian</label></td>
+                        <td><input type="text" class="table-input"></td>
+                    </tr>
+                    <tr>
+                        <td>Kondisi ballast</td>
+                        <td colspan="4" align="center" style="background:#e2e8f0;"><label style="cursor:pointer; margin-right:10px; font-weight:800; color:#000;"><input type="radio" name="sr_uv_bal" value="Ada Penggantian"> Ada Penggantian</label><label style="cursor:pointer; font-weight:800; color:#000;"><input type="radio" name="sr_uv_bal" value="Tidak Ada Penggantian"> Tidak Ada Penggantian</label></td>
+                        <td><input type="text" class="table-input"></td>
+                    </tr>
+
+                    <tr><td align="center" rowspan="4"><b>9.</b></td><td rowspan="4"><b>Lainnya</b></td><td>Cek & perbaikan kebocoran</td><td colspan="4"><input type="text" class="table-input"></td><td><input type="text" class="table-input"></td></tr>
+                    <tr><td>Cek & fungsi WLC</td><td colspan="4"><input type="text" class="table-input"></td><td><input type="text" class="table-input"></td></tr>
+                    <tr><td>Cek & fungsi electrical system</td><td colspan="4"><input type="text" class="table-input"></td><td><input type="text" class="table-input"></td></tr>
+                    <tr><td>Cek kerapihan instalasi</td><td colspan="4"><input type="text" class="table-input"></td><td><input type="text" class="table-input"></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- TAMBAHAN ATRIBUT MULTIPLE -->
+        <div class="live-upload-card" style="border-color:#28a745; margin:15px 0;"><h4 style="margin:0 0 8px 0; color:#28a745;">📸 Lampiran Foto Mesin (Tampil di Histori)</h4><label class="custom-file-upload" style="background:#28a745;">📷 Pilih Banyak Foto<input type="file" accept="image/*" capture="environment" multiple style="display:none;" onchange="uploadGeneralPic(this, 'Foto_Service', 'previewServ')"></label><div id="previewServ" class="preview-container"></div></div>
+
+        <div class="form-box" style="padding-bottom:5px; margin-bottom: 15px;">
+            <div class="box-header">Kondisi Terakhir Unit Mesin</div>
+            <textarea rows="2" class="table-area" style="width:100%; border:none; outline:none; font-size:14px; font-weight:800; color:#000;"></textarea>
+        </div>
+
+        <div class="bottom-layout">
+            <div class="box-saran">
+                <div class="box-saran-title">Saran / Rekomendasi</div>
+                <textarea id="sr_saran" rows="5" class="table-area" style="flex:1; padding:10px; font-size:13px;"></textarea>
+            </div>
+            <div class="box-ttd-group">
+                <div class="box-ttd-header"><div style="flex:2; border-right:1px solid #000;">PT TIRTA TEKNOSYS</div><div style="flex:1;">PELANGGAN</div></div>
+                <div class="box-ttd-body">
+                    <div class="ttd-item"><div class="canvas-container"><canvas class="sig-canvas" id="canvas-serv-teknisi" width="140" height="65"></canvas><button class="btn-clear-sig" onclick="clearCanvas('canvas-serv-teknisi')">Hapus</button></div><input type="text" class="signer-name" placeholder="Nama Teknisi"><div class="ttd-label">Teknisi</div></div>
+                    <div class="ttd-item"><div class="canvas-container"><canvas class="sig-canvas" id="canvas-serv-leader" width="140" height="65"></canvas><button class="btn-clear-sig" onclick="clearCanvas('canvas-serv-leader')">Hapus</button></div><input type="text" class="signer-name" placeholder="Nama Leader"><div class="ttd-label">Leader Teknisi</div></div>
+                    <div class="ttd-item"><div class="canvas-container"><canvas class="sig-canvas" id="canvas-serv-pelanggan" width="140" height="65"></canvas><button class="btn-clear-sig" onclick="clearCanvas('canvas-serv-pelanggan')">Hapus</button></div><input type="text" class="signer-name" placeholder="Nama Pelanggan"><div class="ttd-label">Pelanggan</div></div>
+                </div>
+            </div>
+        </div>
+
+        <div style="font-size: 11px; font-weight: 900; color: #000; margin-top:10px; text-align:right;">Putih: Operasional &nbsp;&nbsp;|&nbsp;&nbsp; Merah: Pelanggan &nbsp;&nbsp;|&nbsp;&nbsp; Kuning: SSO</div>
+
+        <div class="btn-group"><button class="btn btn-submit" onclick="simpanLaporanBeku('Service', 'serviceReport', event)">💾 SIMPAN KE SERVER</button></div>
     </div>
+
+    <div id="historyTab" class="tab-content">
+        <div class="header-title" style="background:#1e293b; color:white;">📜 HISTORI LAPORAN SERVER</div>
+        <p style="font-size:14px; color:#334155; font-weight:bold;">Melacak berkas langsung dari database cloud. Klik <b>"Lihat & Cetak"</b> untuk membuka opsi pengiriman ke G-Drive.</p>
+        
+        <div style="overflow-x:auto;">
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th width="20%">No. Dok / ST</th>
+                        <th width="30%">Klien Kunjungan</th>
+                        <th width="30%">Saran / Catatan</th>
+                        <th width="20%">Aksi Dokumen</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<div class="container" id="arsipViewerModal">
+    <div class="arsip-top-bar">
+        <div>
+            <span style="font-size:18px; font-weight:bold;">📄 PREVIEW DOKUMEN ARSIP</span>
+            <div style="font-size:12px; color:#475569; font-weight:bold;">Pilih metode penyimpanan dokumen di bawah ini:</div>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn btn-print" style="padding:10px 15px; font-size:13px;" onclick="window.print()">🖨️ CETAK / PDF OS</button>
+            <button class="btn" id="btnKirimDrive" style="background-color:#3b82f6; padding:10px 15px; font-size:13px;" onclick="prosesKirimKeGDrive()">📤 KIRIM KE G-DRIVE</button>
+            <button class="btn" style="background-color:#ef4444; padding:10px 15px; font-size:13px;" onclick="tutupPreviewArsip()">❌ KEMBALI</button>
+        </div>
+    </div>
+    
+    <div id="tempatLinkDriveSukses"></div>
+    <div id="areaSuntikLaporanBeku"></div>
+</div>
+
+<!-- MODAL UNTUK MELIHAT BANYAK FOTO DARI HISTORI BISA DI SCROLL -->
+<div id="photoViewerModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; text-align:center; padding:20px; overflow-y:auto;">
+    <span style="color:white; font-size:40px; font-weight:bold; cursor:pointer; position:fixed; top:10px; right:30px; z-index:10000; background:rgba(0,0,0,0.5); padding:0 15px; border-radius:5px;" onclick="document.getElementById('photoViewerModal').style.display='none'">&times;</span>
+    <div id="viewerImagesContainer" style="margin-top:50px; padding-bottom:40px; display:flex; flex-direction:column; align-items:center;"></div>
 </div>
 
 <script>
-    // ==========================================
-    // INITIALISASI FIREBASE REALTIME DATABASE
-    // ==========================================
     const firebaseConfig = {
-        apiKey: "AIzaSyCsMoXOHpjLbikU2Eo6cy9Guo8COFeQEO8",
-        authDomain: "from-aktual-produksi.firebaseapp.com",
-        databaseURL: "https://from-aktual-produksi-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "from-aktual-produksi",
-        storageBucket: "from-aktual-produksi.firebasestorage.app",
-        messagingSenderId: "11519610591",
-        appId: "1:11519610591:web:f297f588ff3d4ee088236a",
-        measurementId: "G-SXQ7ZVSDKV"
+        apiKey: "API_KEY_ANDA",
+        authDomain: "PROJECT_ID.firebaseapp.com",
+        databaseURL: "https://dailyteknisireport-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "PROJECT_ID",
+        storageBucket: "PROJECT_ID.appspot.com",
+        messagingSenderId: "SENDER_ID",
+        appId: "APP_ID"
     };
-    
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    const database = firebase.database();
+    const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzPHuXL-iPM7HNfPs6XfC5rjBCkPaI3RZMEAI3HWO180NPtD-q8vxb5r5-XRUSuA2gw2A/exec";
 
-    const defaultAuthData = {
-        "Suhendra": { role: "produksi", pass: "450316157" },
-        "Hario Rizki Ardhana": { role: "produksi", pass: "2511171107" },
-        "Dhema Ferlandy Putra": { role: "produksi", pass: "251117106" },
-        "Muhammad Iqbal": { role: "produksi", pass: "2511171254" },
-        "Khairuddin": { role: "produksi", pass: "450712103" },
-        "Ngatiyo": { role: "produksi", pass: "45020337" },
-        "Budi Septiyanto": { role: "produksi", pass: "450316158" },
-        "Mohammad Ramadan": { role: "produksi", pass: "2511171286" },
-        "Arliston Sirait": { role: "produksi", pass: "45040564" },
-        "Randi": { role: "Developer", pass: "DV123" }
-    };
+    const tbodyTech = document.getElementById('tbody-tech-parts');
+    if(tbodyTech) { let r=''; for(let i=1;i<=10;i++) r+=`<tr><td align="center"><b>${i}</b></td><td><input type="text" class="table-input"></td><td><input type="text" class="table-input"></td><td><input type="text" class="table-input" style="text-align:center;"></td></tr>`; tbodyTech.innerHTML=r; }
 
-    const spkTracking = {}; 
-    const pendingJobs = {}; 
-    const operatorDashboardStats = {};
-    let globalHistoryData = {}; 
+    let docSeqTech = localStorage.getItem('docSeqTech') ? parseInt(localStorage.getItem('docSeqTech')) : 1;
+    let currentActiveTab = 'tech';
 
-    // ==========================================
-    // DATA PRODUK & INITIALISASI ARRAY
-    // ==========================================
-    const productData = {
-        "AQUATECH TRO 250 GPD/R": { op: "2 orang", time: "23 jam" },
-        "AQUATECH TRO 450 GPD/R": { op: "2 orang", time: "23 jam" },
-        "AQUTECH TRO 800 GPD/R": { op: "2 orang", time: "23 jam" },
-        "UPWS-50": { op: "2 orang", time: "23 jam" },
-        "AQUATECH TRO 250 GPD/E": { op: "1 orang", time: "7 jam" },
-        "AQUATECH TRO 450 GPD/E": { op: "1 orang", time: "7 jam" },
-        "AQUATECH TRO 800 GPD/E": { op: "1 orang", time: "7 jam" },
-        "AQUATECH TRO 1500 GPD/S": { op: "2 orang", time: "24 jam" },
-        "AQUATECH TRO 3000 GPD/S": { op: "2 orang", time: "24 jam" },
-        "AQUATECH TRO 4500 GPD/S": { op: "2 orang", time: "24 jam" },
-        "AQUATECH TRO 6000 GPD/S": { op: "2 orang", time: "24 jam" },
-        "AQUATECH TRO 3000 GPD/BRX": { op: "2 orang", time: "24 jam" },
-        "AQUATECH TRO 4500 GPD/BRX": { op: "2 orang", time: "24 jam" },
-        "AQUATECH TRO 6000 GPD/BRX": { op: "2 orang", time: "24 jam" },
-        "AQUATECH TRO 1500 GPD/MX": { op: "2 orang", time: "24 jam" },
-        "AQUATECH TRO 3000 GPD/MX": { op: "2 orang", time: "24 jam" },
-        "AQUATECH TRO 4500 GPD/MX": { op: "2 orang", time: "24 jam" },
-        "AQUATECH TRO 6000 GPD/MX": { op: "2 orang", time: "24 jam" },
-        "AQUATECH TRO 1500 GPD/L": { op: "2 orang", time: "24 jam" },
-        "AQUATECH TRO 3000 GPD/L": { op: "2 orang", time: "24 jam" },
-        "AQUATECH TRO 4500 GPD/L": { op: "2 orang", time: "24 jam" },
-        "AQUATECH TRO 6000 GPD/L": { op: "2 orang", time: "24 jam" },
-        "FLOOR STANDING": { op: "2 orang", time: "24 jam" },
-        "EF": { op: "1 orang", time: "7 jam" },
-        "TRO MOBILE MH3": { op: "2 orang", time: "24 jam" },
-        "UF BEAVER 8.0 AD": { op: "2 orang", time: "24 jam" },
-        "UF BEAVER 4.0 AD": { op: "2 orang", time: "24 jam" },
-        "UF BEAVER 2.0 AD": { op: "2 orang", time: "7 jam" },
-        "UF BEAVER 24.0 AD": { op: "2 orang", time: "48 jam" },
-        "FRAME TRO 3000 6000 GPD BRX": { op: "2 orang", time: "15 jam" },
-        "FRAME TRO 250 - 800 GPD / E": { op: "2 orang", time: "15 jam" },
-        "FRAME TRO 250 - 800 GPD / R": { op: "2 orang", time: "15 jam" },
-        "FRAME UF 4.0 & 8.0 AD": { op: "2 orang", time: "15 jam" },
-        "FRAME UF 2.0 AD": { op: "2 orang", time: "7 jam" },
-        "FRAME UF 24.0 AD": { op: "2 orang", time: "24 jam" },
-        "FRAME WTP ZOOMBA": { op: "2 orang", time: "30 jam" },
-        "FRAME FLOOR STANDING": { op: "2 orang", time: "15 jam" },
-        "FRAME EF": { op: "1 orang", time: "7 jam" },
-        "FRAME TRO MOBILE MH3": { op: "2 orang", time: "15 jam" },
-        "SUPPORT POMPA TANKI": { op: "1 orang", time: "7 jam" },
-        "FRAME UPWS": { op: "2 orang", time: "15 jam" },
-        "RENALPRO R-104": { op: "2 orang", time: "40 jam" },
-        "RENALPRO R-404": { op: "2 orang", time: "40 jam" },
-        "WTP ZOOMBA": { op: "2 orang", time: "15 jam" },
-        "PANEL CONDUCTIVITY": { op: "1 orang", time: "4 jam" },
-        "PANEL SBR PIK": { op: "2 orang", time: "53 jam" },
-        "PANEL LIFT PUMP": { op: "1 orang", time: "24 jam" },
-        "PANEL SISTEM STP": { op: "1 orang", time: "24 jam" },
-        "PANEL SISTEM WTP": { op: "1 orang", time: "24 jam" },
-        "PANEL SISTEM IPAL": { op: "1 orang", time: "24 jam" },
-        "PANEL UPWS": { op: "1 orang", time: "12 jam" },
-        "HANDLE AQUATECH S.O AD 2.O AD": { op: "1 orang", time: "1 jam" },
-        "HANDLE AQUATECH O.R 2.O AD": { op: "1 orang", time: "1 jam" },
-        "HANDLE AQUATECH M.B 2.O MS": { op: "1 orang", time: "1 jam" },
-        "PRE FILTRATION MX": { op: "2 orang", time: "16 jam" },
-        "Other": { op: "", time: "" }
-    };
+    // PENYIMPANAN FOTO SEMENTARA DIRUBAH MENJADI ARRAY UNTUK MENAMPUNG BANYAK FOTO
+    window.tempPhotos = { tech: [], service: [] };
 
-    const extraOptions = [
-        { value: "Selesai Awal", text: "Pekerjaan Selesai Awal" },
-        { value: "Selesai Tepat Waktu", text: "Pekerjaan Selesai Tepat Waktu" },
-        { value: "Lanjutkan Besok", text: "Lanjutkan Besok" },
-        { value: "Lembur (Reguler) - 4 Jam", text: "Lembur (Reguler) - 4 Jam" },
-        { value: "Lembur (Sabtu/Minggu) - 9 Jam", text: "Lembur (Sabtu/Minggu) - 9 Jam" }
-    ];
+    function openTab(evt, tabName, typeName) {
+        document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
+        document.querySelectorAll(".nav-tabs button").forEach(el => el.classList.remove("active"));
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+        
+        const kop = document.getElementById('kopSuratArea');
+        currentActiveTab = typeName;
 
-    const selectProduk = document.getElementById("nama_produk");
-    for (let key in productData) {
-        let option = document.createElement("option");
-        option.value = key;
-        option.text = key;
-        selectProduk.appendChild(option);
+        if(tabName === 'historyTab') { kop.style.display = 'none'; muatHistoriDariServer(); } 
+        else { kop.style.display = 'grid'; renderKopTransaksional(); }
     }
 
-    // ==========================================
-    // HELPER FUNCTION: FUNGSI TOGGLE UNTUK OPSI OTHER
-    // ==========================================
-    function toggleManualOption(selectElement, rowId, inputId) {
-        const row = document.getElementById(rowId);
-        const input = document.getElementById(inputId);
-        if (selectElement.value === 'Other') {
-            row.classList.remove('hidden');
-            input.setAttribute('required', 'true');
-        } else {
-            row.classList.add('hidden');
-            input.removeAttribute('required');
-            input.value = ''; // Kosongkan field
-        }
-    }
+    function renderKopTransaksional() {
+        const pfx = document.getElementById('docPrefix'), num = document.getElementById('docNumberDisplay'), rev = document.getElementById('kopNoRev'), tgl = document.getElementById('kopTglBerlaku'), jdl = document.getElementById('judulKopDinamic');
+        if(currentActiveTab === 'tech') { jdl.innerText = "PORTAL LAPORAN HARIAN TEKNISI"; pfx.innerText = "TT.F.TEC."; num.innerText = docSeqTech.toString().padStart(3, '0'); rev.innerText = "02"; tgl.innerText = "21/06/2027"; } 
+        else if(currentActiveTab === 'service') { jdl.innerText = "SERVICE REPORT"; pfx.innerText = "TT.TEC.F."; num.innerText = "002"; rev.innerText = "01"; tgl.innerText = "09/06/2025"; }
+    } renderKopTransaksional();
 
-    // ==========================================
-    // HELPER FUNCTION: KONVERSI BASE64 UNTUK GAMBAR
-    // ==========================================
-    function getBase64(file) {
-        return new Promise((resolve, reject) => {
+    function updateClock() { const now = new Date(); document.getElementById('clockDisplay').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }); } setInterval(updateClock, 1000); updateClock();
+
+    function initSigCanvases() {
+        document.querySelectorAll('.sig-canvas').forEach(canvas => {
+            const ctx = canvas.getContext('2d'); let drawing = false;
+            const start = (e) => { drawing = true; draw(e); }; const stop = () => { drawing = false; ctx.beginPath(); };
+            const draw = (e) => { if (!drawing) return; e.preventDefault(); const rect = canvas.getBoundingClientRect(); const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left; const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.strokeStyle = '#000'; ctx.lineTo(x, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y); };
+            canvas.addEventListener('mousedown', start); canvas.addEventListener('mouseup', stop); canvas.addEventListener('mousemove', draw); canvas.addEventListener('mouseleave', stop);
+            canvas.addEventListener('touchstart', start, {passive:false}); canvas.addEventListener('touchend', stop); canvas.addEventListener('touchmove', draw, {passive:false});
+        });
+    } initSigCanvases();
+    function clearCanvas(id) { const c = document.getElementById(id); c.getContext('2d').clearRect(0, 0, c.width, c.height); }
+
+    // UPLOAD & COMPRESS BANYAK FOTO SEKALIGUS KE DALAM ARRAY LOKAL
+    function uploadGeneralPic(fileInput, reportType, previewBoxId) {
+        const files = fileInput.files; 
+        if(files.length === 0) return; 
+        
+        const pBox = document.getElementById(previewBoxId);
+        pBox.innerHTML = `<div style="background:#fff3cd; color:#856404; padding:8px; border-radius:5px; font-weight:bold;">⏳ Memproses ${files.length} foto...</div>`; 
+        
+        let processedCount = 0;
+        const targetArray = reportType === 'Foto_Technical' ? window.tempPhotos.tech : window.tempPhotos.service;
+        
+        Array.from(files).forEach(file => {
             const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800; // Kompres ukuran
+                    let scaleSize = 1;
+                    if (img.width > MAX_WIDTH) { scaleSize = MAX_WIDTH / img.width; }
+                    
+                    canvas.width = img.width * scaleSize;
+                    canvas.height = img.height * scaleSize;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    const base64Data = canvas.toDataURL('image/jpeg', 0.6); // Kualitas JPEG 60%
+                    targetArray.push(base64Data);
+                    processedCount++;
+                    
+                    if (processedCount === files.length) {
+                        pBox.innerHTML = `<div style="background:#d4edda; color:#155724; padding:8px; border-radius:5px;">✅ <b>${targetArray.length} Foto Tersimpan di Memori!</b> (Otomatis dilampirkan saat Simpan ke Server)</div>`;
+                    }
+                };
+                img.src = e.target.result;
+            }; 
             reader.readAsDataURL(file);
-            reader.onload = () => {
-                let encoded = reader.result.toString().replace(/^data:(.*,)?/, '');
-                if ((encoded.length % 4) > 0) {
-                    encoded += '='.repeat(4 - (encoded.length % 4));
-                }
-                resolve({ name: file.name, mimeType: file.type, base64: encoded });
-            };
-            reader.onerror = error => reject(error);
         });
     }
 
-    // ==========================================
-    // SINKRONISASI DATA DARI CLOUD KE LOKAL (REALTIME)
-    // ==========================================
-    db.ref('authData').on('value', (snapshot) => {
-        let data = snapshot.val();
-        if (!data) {
-            db.ref('authData').set(defaultAuthData);
-            localStorage.setItem('authDataPTTT', JSON.stringify(defaultAuthData));
-        } else {
-            localStorage.setItem('authDataPTTT', JSON.stringify(data));
-        }
-    });
-
-    db.ref('config/formCounter').on('value', (snapshot) => {
-        let counter = snapshot.val() || 1;
-        localStorage.setItem('formCounterTT', counter);
-        updateFormNumberDisplay();
-    });
-
-    db.ref('pendingJobs').on('value', (snapshot) => {
-        const data = snapshot.val() || {};
-        for (let key in pendingJobs) delete pendingJobs[key];
-        Object.assign(pendingJobs, data);
-        renderPendingJobs();
-    });
-
-    db.ref('operatorDashboardStats').on('value', (snapshot) => {
-        const data = snapshot.val() || {};
-        for (let key in operatorDashboardStats) delete operatorDashboardStats[key];
-        Object.assign(operatorDashboardStats, data);
-    });
-
-    db.ref('history').on('value', (snapshot) => {
-        const data = snapshot.val() || {};
-        globalHistoryData = data; 
-        renderHistoryTable(data);
-        renderKPIDashboard(data);
-    });
-
-    // ==========================================
-    // FUNGSI AUTENTIKASI DAN UBAH SANDI
-    // ==========================================
-    function checkLoginStatus() {
-        const loggedInUser = localStorage.getItem('loggedInUserPTTT');
-        if (loggedInUser) {
-            document.getElementById('login-section').classList.add('d-none');
-            document.getElementById('main-app').classList.remove('d-none');
-            const userObj = JSON.parse(loggedInUser);
-            document.getElementById('header_operator_name').innerHTML = `[OPR: <strong>${userObj.name}</strong>]`;
-            
-            // Tampilkan KPI Dashboard jika rolenya Developer
-            if(userObj.role === 'Developer') {
-                document.getElementById('kpiDashboardContainer').classList.remove('hidden');
-            } else {
-                document.getElementById('kpiDashboardContainer').classList.add('hidden');
-            }
-
-            db.ref('history').once('value').then((snapshot) => {
-                let d = snapshot.val() || {};
-                renderHistoryTable(d);
-                renderKPIDashboard(d);
-            });
-            
-            renderPendingJobs(); // Re-render for appropriate buttons based on Role
-        } else {
-            document.getElementById('login-section').classList.remove('d-none');
-            document.getElementById('main-app').classList.add('d-none');
-        }
+    // FUNGSI AUTO-FILL JAM REAL-TIME
+    function setWaktuSekarang(idInput) {
+        const sekarang = new Date();
+        const jam = sekarang.getHours().toString().padStart(2, '0');
+        const menit = sekarang.getMinutes().toString().padStart(2, '0');
+        document.getElementById(idInput).value = `${jam}:${menit}`;
     }
 
-    function handleLogin(event) {
-        event.preventDefault();
-        const pass = document.getElementById('login_password').value;
-        const dbAuth = JSON.parse(localStorage.getItem('authDataPTTT')) || defaultAuthData;
-
-        let foundUser = null;
-        for (let user in dbAuth) {
-            if (String(dbAuth[user].pass) === String(pass)) {
-                foundUser = { name: user, role: dbAuth[user].role };
-                break;
-            }
-        }
-
-        if (foundUser) {
-            localStorage.setItem('loggedInUserPTTT', JSON.stringify(foundUser));
-            document.getElementById('login_password').value = "";
-            checkLoginStatus();
-        } else {
-            alert("❌ Akses Ditolak: Kata sandi yang Anda masukkan tidak terdaftar.");
-        }
-    }
-
-    function handleLogout() {
-        if(confirm("Selesaikan sesi kerja dan logout?")) {
-            localStorage.removeItem('loggedInUserPTTT');
-            document.getElementById('login_password').value = "";
-            checkLoginStatus();
-            window.scrollTo(0,0);
-        }
-    }
-
-    function openPasswordModal() { document.getElementById('passwordModal').style.display = "block"; }
-    function closePasswordModal() { document.getElementById('passwordModal').style.display = "none"; }
-
-    function updatePassword(event) {
-        event.preventDefault();
-        const btnUpdate = document.getElementById('btn-update-password');
-        btnUpdate.innerText = "MENYIMPAN...";
-        btnUpdate.disabled = true;
-
-        const resetBtn = () => { btnUpdate.innerText = "SIMPAN SANDI BARU"; btnUpdate.disabled = false; };
-        try {
-            const loggedInUser = JSON.parse(localStorage.getItem('loggedInUserPTTT'));
-            const dbAuth = JSON.parse(localStorage.getItem('authDataPTTT'));
-            const oldPass = document.getElementById('old_password').value;
-            const newPass = document.getElementById('new_password').value;
-            const confirmPass = document.getElementById('confirm_password').value;
-
-            if (String(dbAuth[loggedInUser.name].pass) !== String(oldPass)) { alert("Sandi lama salah."); resetBtn(); return; }
-            if (newPass !== confirmPass) { alert("Konfirmasi sandi tidak sinkron."); resetBtn(); return; }
-
-            db.ref(`authData/${loggedInUser.name}/pass`).set(newPass)
-                .then(() => {
-                    dbAuth[loggedInUser.name].pass = newPass;
-                    localStorage.setItem('authDataPTTT', JSON.stringify(dbAuth));
-                    alert("✅ Sandi berhasil diperbarui!");
-                    closePasswordModal();
-                })
-                .catch((error) => alert("❌ Error: " + error.message))
-                .finally(() => resetBtn());
-        } catch (error) { alert("Error sistem: " + error.message); resetBtn(); }
-    }
-
-    checkLoginStatus();
-
-    // ==========================================
-    // LOGIKA APLIKASI FORM PRODUKSI
-    // ==========================================
-    function getNextFormNumber() {
-        let counter = parseInt(localStorage.getItem('formCounterTT')) || 1;
-        return "FM-PRD-AKT-TT-" + String(counter).padStart(2, '0');
-    }
-
-    function updateFormNumberDisplay() {
-        document.getElementById('form_no_display').innerText = getNextFormNumber();
-    }
-
-    function updateProductData() {
-        const selected = selectProduk.value;
-        const opField = document.getElementById("std_operator");
-        const timeField = document.getElementById("std_waktu");
-        const manualRow = document.getElementById("row_manual_produk");
-        const manualInput = document.getElementById("manual_nama_produk");
-
-        if (selected && productData[selected]) {
-            if (selected === "Other") {
-                manualRow.classList.remove("hidden");
-                manualInput.setAttribute("required", "true");
-                opField.removeAttribute("readonly"); timeField.removeAttribute("readonly");
-                opField.value = ""; timeField.value = "";
-            } else {
-                manualRow.classList.add("hidden");
-                manualInput.removeAttribute("required");
-                opField.setAttribute("readonly", "true"); timeField.setAttribute("readonly", "true");
-                opField.value = productData[selected].op; timeField.value = productData[selected].time;
-            }
-        }
-    }
-
-    function checkTimeLogic() {
-        const timeVal = document.getElementById('waktu_update').value;
-        if (!timeVal) return;
-        const dateObj = new Date(timeVal);
-        const hours = dateObj.getHours();
-        const select = document.getElementById('kondisi_kerja');
-        const currentValue = select.value;
-
-        Array.from(select.options).forEach(opt => { if (opt.classList.contains('opt-16')) select.removeChild(opt); });
-
-        if (hours >= 16) {
-            extraOptions.forEach(eo => {
-                const option = document.createElement('option');
-                option.value = eo.value; option.text = eo.text; option.classList.add('opt-16');
-                // Insert extra options before the "Other" option if it exists
-                const otherOpt = select.querySelector('.opt-other');
-                if (otherOpt) select.insertBefore(option, otherOpt);
-                else select.appendChild(option);
-            });
-            if (extraOptions.some(eo => eo.value === currentValue)) select.value = currentValue;
-        } else {
-            if (extraOptions.some(eo => eo.value === currentValue)) select.value = "Idle Time"; 
-        }
+    function simpanLaporanBeku(reportType, tabId, event) {
+        const btn = event.currentTarget; const oriTxt = btn.innerHTML; btn.innerHTML = "⏳ Mengunci Data..."; btn.disabled = true;
+        const activeTab = document.getElementById(tabId), kopSurat = document.getElementById('kopSuratArea');
+        const isTech = reportType === 'Technical'; const docKodeLengkap = isTech ? ("TT.F.TEC." + docSeqTech.toString().padStart(3,'0')) : "TT.TEC.F.002";
+        const custVal = document.getElementById(isTech ? 'tr_cust' : 'sr_cust') ? document.getElementById(isTech ? 'tr_cust' : 'sr_cust').value.trim().toUpperCase() : '';
+        const stVal = document.getElementById(isTech ? 'tr_st' : 'sr_st') ? document.getElementById(isTech ? 'tr_st' : 'sr_st').value.trim() : '';
+        const namaCustomer = custVal !== '' ? custVal : 'CUSTOMER TANPA NAMA', suratTugas = stVal !== '' ? stVal : 'TANPA-ST'; const payloadId = "REP_" + Date.now();
         
-        // Panggil toggleManualOption agar kolom manual tertutup jika status direset
-        toggleManualOption(select, 'row_manual_kondisi', 'manual_kondisi');
-    }
-
-    // ==========================================
-    // RENDERING & PENGHAPUSAN HISTORI
-    // ==========================================
-    function renderHistoryTable(data) {
-        const tbody = document.getElementById("historyTable").querySelector("tbody");
-        tbody.innerHTML = "";
+        const saranVal = document.getElementById(isTech ? 'tr_saran' : 'sr_saran') ? document.getElementById(isTech ? 'tr_saran' : 'sr_saran').value.trim() : '';
         
-        let items = [];
-        for (let id in data) {
-            let item = data[id];
-            item.firebaseKey = id; 
-            items.push(item);
-        }
-        items.sort((a, b) => b.formNo.localeCompare(a.formNo));
+        // PEMBUATAN TANGGAL MUTLAK SECARA REAL-TIME (TIDAK BISA DIMANIPULASI)
+        const currentRealDate = new Date().toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit', year:'numeric'}).replace(/\//g, '-');
+        if (isTech && document.getElementById('tr_tgl')) document.getElementById('tr_tgl').value = currentRealDate;
+        if (!isTech && document.getElementById('sr_tgl')) document.getElementById('sr_tgl').value = currentRealDate;
 
-        const loggedInUserStr = localStorage.getItem('loggedInUserPTTT');
-        let userRole = loggedInUserStr ? JSON.parse(loggedInUserStr).role : "";
-
-        items.forEach(item => {
-            let statusHtml = `<strong style="color:var(--warning);">${item.kondisi}</strong>`;
-            
-            // Tombol Khusus Developer: Edit & Delete
-            if (userRole === 'Developer') {
-                statusHtml += `<br>
-                <button class="btn-edit" onclick="openEditHistoryModal('${item.firebaseKey}')">EDIT</button>
-                <button class="btn-delete" onclick="deleteHistoryItem('${item.firebaseKey}')">HAPUS</button>`;
-            }
-
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td><strong style="color:var(--neon-cyan);">${item.formNo}</strong></td>
-                <td>${item.waktu}</td>
-                <td>${item.operator}</td>
-                <td>${item.noSpp}</td>
-                <td>${item.namaProduk}</td>
-                <td><span class="status-badge status-good">${item.kategori || 'Reguler'}</span></td>
-                <td>${item.stdWaktu}</td>
-                <td>${statusHtml}</td>
-                <td>${item.alasan}</td>
-                <td>${item.uraian}</td>
-                <td><span style="color:var(--text-muted); font-size:11px;">[${item.foto}]</span></td>
-            `;
-            tbody.appendChild(tr);
+        const cloneKop = kopSurat.cloneNode(true), cloneTab = activeTab.cloneNode(true);
+        const originalInputs = activeTab.querySelectorAll('input, textarea, select'), clonedInputs = cloneTab.querySelectorAll('input, textarea, select');
+        
+        originalInputs.forEach((orig, index) => { 
+            const clone = clonedInputs[index]; 
+            if (orig.type === 'checkbox' || orig.type === 'radio') { 
+                if (orig.checked) { clone.setAttribute('checked', 'checked'); clone.checked = true; } 
+                else { clone.removeAttribute('checked'); clone.checked = false; }
+                if (clone.name) clone.name = clone.name + "_arsip_" + Date.now(); 
+            } 
+            else if (orig.tagName.toLowerCase() === 'textarea') { 
+                const divPenggantiTextarea = document.createElement('div');
+                divPenggantiTextarea.innerHTML = orig.value || '&nbsp;';
+                divPenggantiTextarea.style.cssText = 'white-space: pre-wrap; word-break: break-word; font-size:13px; font-weight:900; color:#000000; -webkit-text-fill-color:#000000; font-family:inherit; padding:8px; min-height:30px;';
+                clone.parentNode.replaceChild(divPenggantiTextarea, clone);
+            } 
+            else { 
+                clone.setAttribute('value', orig.value); 
+                clone.setAttribute('readonly', 'true'); 
+            } 
         });
+
+        const originalCanvases = activeTab.querySelectorAll('canvas'), clonedCanvasContainers = cloneTab.querySelectorAll('.canvas-container');
+        originalCanvases.forEach((canvas, index) => { const container = clonedCanvasContainers[index]; const imgUrl = canvas.toDataURL('image/png'); container.innerHTML = `<img src="${imgUrl}" style="width:100%; height:55px; object-fit:contain; display:block; margin:0 auto;">`; container.style.border = "none"; });
+
+        cloneTab.querySelectorAll('.btn-group, .live-upload-card, .btn-clear-sig, .btn-time').forEach(el => el.remove());
+        if(cloneKop.querySelector('.realtime-clock')) cloneKop.querySelector('.realtime-clock').remove();
+
+        const pembungkusArsip = document.createElement('div'); pembungkusArsip.appendChild(cloneKop); pembungkusArsip.appendChild(cloneTab);
+
+        // AMBIL ARRAY FOTO LALU JADIKAN STRING JSON
+        const photoData = isTech ? window.tempPhotos.tech : window.tempPhotos.service;
+
+        database.ref('laporan_teknisi/' + payloadId).set({ 
+            id: payloadId, 
+            tipe: reportType, 
+            klien: namaCustomer, 
+            docFull: docKodeLengkap, 
+            suratTugas: suratTugas, 
+            tanggal: currentRealDate + ' ' + new Date().toLocaleTimeString('id-ID'), 
+            saran: saranVal,
+            foto: JSON.stringify(photoData), // Simpan seluruh array base64 foto ke database
+            htmlSnapshot: pembungkusArsip.outerHTML 
+        })
+        .then(() => {
+            btn.innerHTML = oriTxt; btn.disabled = false; alert(`✅ TERSIMPAN KE CLOUD!\n\nID: ${docKodeLengkap}\nST: ${suratTugas}\nKlien: ${namaCustomer}`);
+            if(isTech) { docSeqTech++; localStorage.setItem('docSeqTech', docSeqTech); renderKopTransaksional(); }
+            document.querySelectorAll('input[type="text"]:not([readonly]), input[type="time"], textarea').forEach(el => el.value = ''); 
+            document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(el => el.checked = false); 
+            document.querySelectorAll('.sig-canvas').forEach(c => c.getContext('2d').clearRect(0,0,c.width,c.height)); 
+            document.querySelectorAll('.preview-container').forEach(el => el.innerHTML = '');
+            window.tempPhotos = { tech: [], service: [] }; // Reset array foto setelah disubmit
+        }).catch(err => { btn.innerHTML = oriTxt; btn.disabled = false; alert("❌ Gagal tersambung ke server: " + err.message); });
     }
 
-    function deleteHistoryItem(key) {
-        if(confirm("PERINGATAN: Apakah Anda yakin ingin menghapus log histori ini secara permanen dari database?")) {
-            db.ref(`history/${key}`).remove()
-                .then(() => alert("Data berhasil dihapus dari cloud."))
-                .catch((error) => alert("Gagal menghapus data: " + error.message));
-        }
-    }
+    window.arsipGlobalServer = [];
+    window.arsipSedangDibuka = null;
 
-    // ==========================================
-    // DASHBOARD KPI (AUTO-DETECT JUMLAH PEKERJA BERDASARKAN ANTREAN TUGAS)
-    // ==========================================
-    function renderKPIDashboard(data) {
-        const tbody = document.getElementById("kpiTable").querySelector("tbody");
-        tbody.innerHTML = "";
-
-        // Tahap 1: Lacak otomatis ada berapa orang unik yang ikut mengerjakan sebuah SPP
-        let sppWorkers = {}; 
-        for(let key in data) {
-            let item = data[key];
-            if(item.noSpp) {
-                if(!sppWorkers[item.noSpp]) sppWorkers[item.noSpp] = new Set();
-                sppWorkers[item.noSpp].add(item.operator); // Set otomatis mengabaikan nama ganda
-            }
-        }
-
-        // Tahap 2: Kalkulasi Skor KPI
-        let operatorStats = {};
-        for(let key in data) {
-            let item = data[key];
-            if(!item.kondisi) continue;
-            
-            let isCompleted = item.kondisi.includes("Selesai") || item.kondisi.includes("Lembur");
-
-            if(!operatorStats[item.operator]) {
-                operatorStats[item.operator] = { totalDone: 0, onTime: 0, early: 0, overtime: 0, totalScore: 0 };
-            }
-
-            if(isCompleted) {
-                operatorStats[item.operator].totalDone++;
+    function muatHistoriDariServer() {
+        const tbody = document.getElementById('historyTableBody'); tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#000; font-weight:bold;">⏳ Menarik arsip cloud...</td></tr>';
+        database.ref('laporan_teknisi').once('value').then((snapshot) => {
+            tbody.innerHTML = ''; if(!snapshot.exists()) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#888;">Belum ada dokumen tersimpan di server cloud.</td></tr>'; return; }
+            let susunanLaporan = []; snapshot.forEach((child) => { susunanLaporan.push(child.val()); }); susunanLaporan.reverse(); window.arsipGlobalServer = susunanLaporan;
+            susunanLaporan.forEach(item => {
+                const tr = document.createElement('tr'); 
+                const stText = item.tipe === 'Service' ? `<span style="color:var(--primary); font-weight:800;">ST: ${item.suratTugas || '-'}</span>` : `No: ${item.docFull}`;
                 
-                let baseScore = 0;
-
-                // A. Poin Ketepatan Waktu
-                if(item.kondisi === "Selesai Tepat Waktu") {
-                    operatorStats[item.operator].onTime++;
-                    baseScore = 100;
-                } else if(item.kondisi === "Selesai Awal") {
-                    operatorStats[item.operator].early++;
-                    baseScore = 110; 
-                } else if(item.kondisi.includes("Lembur")) {
-                    operatorStats[item.operator].overtime++;
-                    baseScore = 80; // Pinalti karena tidak tepat waktu (lembur)
-                } else {
-                    baseScore = 90; 
+                let teksSaran = "<i>Tidak ada saran</i>";
+                if (item.saran && item.saran !== "") {
+                    teksSaran = item.saran.length > 60 ? item.saran.substring(0, 60) + '...' : item.saran;
                 }
 
-                // B. Poin Manpower (Auto-Detect dari Set pekerja unik di SPP yang sama)
-                let actMP = sppWorkers[item.noSpp].size; 
-                let stdMP = item.stdManpower || 1; // Standar manpower tersimpan di log
-                let penaltyManpower = 0;
-
-                if (actMP > stdMP) {
-                    // Pengurangan poin jika pekerja yang terlibat melebihi standar
-                    penaltyManpower = (actMP - stdMP) * 15;
-                } else if (actMP < stdMP && actMP > 0) {
-                    // Bonus poin jika yang ngerjain lebih sedikit dari standar
-                    penaltyManpower = -10; 
+                // MENGHITUNG JUMLAH FOTO JIKA ADA
+                let arrFoto = [];
+                if(item.foto) {
+                    try { arrFoto = JSON.parse(item.foto); } 
+                    catch(e) { if(item.foto !== "[]") arrFoto = [item.foto]; } // Kompatibilitas mundur jika datanya bukan array
                 }
+                const btnFoto = arrFoto.length > 0 ? `<button class="btn" style="background-color:#10b981; color:white; border:none; padding:6px 12px; cursor:pointer; font-size:12px; font-weight:bold; border-radius:4px;" onclick="lihatFotoHistory('${item.id}')">📸 ${arrFoto.length} Foto</button>` : '';
 
-                let finalTaskScore = baseScore - penaltyManpower;
-                operatorStats[item.operator].totalScore += finalTaskScore;
-            }
-        }
-
-        let hasData = false;
-        for (let op in operatorStats) {
-            let stats = operatorStats[op];
-            if(stats.totalDone === 0) continue;
-            hasData = true;
-
-            let finalScore = stats.totalScore / stats.totalDone;
-            // Cap skor di angka 100 secara visual jika melebihi 100
-            if(finalScore > 100) finalScore = 100; 
-
-            let badgeClass = finalScore >= 90 ? "status-good" : (finalScore >= 75 ? "status-kpi" : "status-danger");
-
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td><strong>${op}</strong></td>
-                <td>${stats.totalDone} SPP</td>
-                <td style="color:var(--success)">${stats.early}x</td>
-                <td style="color:var(--neon-cyan)">${stats.onTime}x</td>
-                <td style="color:var(--danger)">${stats.overtime}x</td>
-                <td><span class="status-badge ${badgeClass}">${finalScore.toFixed(1)} / 100</span></td>
-            `;
-            tbody.appendChild(tr);
-        }
-
-        if(!hasData) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Belum ada data penyelesaian (Selesai/Lembur) untuk dinilai.</td></tr>`;
-        }
+                tr.innerHTML = `
+                    <td>${stText}<br><span style="font-size:11px; color:#334155; font-weight:600;">${item.tanggal} (${item.tipe})</span></td>
+                    <td style="font-weight:900; color:#000;">${item.klien}</td>
+                    <td style="font-size:12px; color:#334155;">${teksSaran}</td>
+                    <td><div style="display:flex; gap:6px; flex-wrap:wrap;"><button class="btn-view-sm" style="flex:1;" onclick="bukaLayarSiapCetak('${item.id}')">Lihat & Cetak</button>${btnFoto}<button class="btn-danger-sm" onclick="hapusLaporanServer('${item.id}')">🗑️</button></div></td>
+                `; 
+                tbody.appendChild(tr);
+            });
+        }).catch(err => { tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red; padding:20px;">❌ Masalah Koneksi: ${err.message}</td></tr>`; });
     }
 
-    // ==========================================
-    // PENDING JOBS & LAINNYA
-    // ==========================================
-    function renderPendingJobs() {
-        const tbody = document.getElementById("pendingTable").querySelector("tbody");
-        const container = document.getElementById("pendingContainer");
-        tbody.innerHTML = "";
-        let hasPending = false;
-
-        const loggedInUserStr = localStorage.getItem('loggedInUserPTTT');
-        let userRole = loggedInUserStr ? JSON.parse(loggedInUserStr).role : "";
-
-        for (let spp in pendingJobs) {
-            const job = pendingJobs[spp];
-            hasPending = true;
-            
-            let actionHtml = `<button type="button" class="btn-resume" onclick="resumeJob('${spp}')">LANJUTKAN</button>`;
-            if (userRole === 'Developer') {
-                actionHtml += `<button type="button" class="btn-delete" onclick="deletePendingJob('${spp}')" style="margin-left:5px;">HAPUS</button>`;
-            }
-
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td><strong style="color:var(--neon-cyan)">${spp}</strong></td>
-                <td>${job.namaProduk}</td>
-                <td>${job.operator}</td>
-                <td><span class="status-badge status-danger">${job.status}</span></td>
-                <td>${actionHtml}</td>
-            `;
-            tbody.appendChild(tr);
+    // FUNGSI UNTUK MEMUNCULKAN BANYAK GAMBAR DARI HISTORI (SCROLLABLE)
+    function lihatFotoHistory(idArsip) {
+        const target = window.arsipGlobalServer.find(x => x.id === idArsip);
+        let arrFoto = [];
+        if(target && target.foto) {
+            try { arrFoto = JSON.parse(target.foto); } 
+            catch(e) { arrFoto = [target.foto]; }
         }
-        if (hasPending) container.classList.remove("hidden");
-        else container.classList.add("hidden");
-    }
-
-    // Fungsi Menghapus Pending Job (Dev Only)
-    function deletePendingJob(spp) {
-        if(confirm(`Peringatan (Khusus Developer): Anda yakin ingin menghapus SPP "${spp}" dari antrean tertunda secara permanen?`)) {
-            db.ref(`pendingJobs/${spp}`).remove()
-                .then(() => alert("✅ Antrean berhasil dihapus dari cloud!"))
-                .catch((err) => alert("❌ Gagal menghapus: " + err.message));
-        }
-    }
-
-    function openEditHistoryModal(key) {
-        const item = globalHistoryData[key];
-        document.getElementById('edit_key').value = key;
-        document.getElementById('edit_spp').value = item.noSpp || "";
-        document.getElementById('edit_produk').value = item.namaProduk || "";
         
-        const kategoriSelect = document.getElementById('edit_kategori');
-        let hasKatOpt = false;
-        for (let i = 0; i < kategoriSelect.options.length; i++) {
-            if (kategoriSelect.options[i].value === item.kategori) { kategoriSelect.selectedIndex = i; hasKatOpt = true; break; }
-        }
-        if (!hasKatOpt) {
-            let newOpt = document.createElement("option"); newOpt.value = item.kategori; newOpt.text = item.kategori;
-            kategoriSelect.appendChild(newOpt); kategoriSelect.value = item.kategori;
-        }
+        if(arrFoto.length > 0) {
+            const container = document.getElementById('viewerImagesContainer');
+            container.innerHTML = ''; // Kosongkan wadah sebelumnya
+            
+            arrFoto.forEach((b64, index) => {
+                const img = document.createElement('img');
+                img.src = b64;
+                img.style.cssText = "max-width:90%; border:3px solid #fff; border-radius:8px; margin-bottom:20px; box-shadow:0 10px 25px rgba(0,0,0,0.5);";
+                container.appendChild(img);
+            });
 
-        const statusSelect = document.getElementById('edit_status');
-        let hasStatOpt = false;
-        for (let i = 0; i < statusSelect.options.length; i++) {
-            if (statusSelect.options[i].value === item.kondisi) { statusSelect.selectedIndex = i; hasStatOpt = true; break; }
+            document.getElementById('photoViewerModal').style.display = 'block';
+        } else {
+            alert("❌ Foto tidak ditemukan untuk laporan ini.");
         }
-        if (!hasStatOpt) {
-            let newOpt = document.createElement("option"); newOpt.value = item.kondisi; newOpt.text = item.kondisi;
-            statusSelect.appendChild(newOpt); statusSelect.value = item.kondisi;
-        }
-
-        document.getElementById('edit_stdwaktu').value = item.stdWaktu || "";
-        document.getElementById('edit_alasan').value = item.alasan || "";
-        document.getElementById('edit_uraian').value = item.uraian || "";
-        document.getElementById('editHistoryModal').style.display = "block";
     }
 
-    function closeEditHistoryModal() { document.getElementById('editHistoryModal').style.display = "none"; }
+    function bukaLayarSiapCetak(idArsip) {
+        const target = window.arsipGlobalServer.find(x => x.id === idArsip);
+        if(!target) return;
 
-    function submitEditHistory(event) {
-        event.preventDefault();
-        const key = document.getElementById('edit_key').value;
-        const newData = {
-            noSpp: document.getElementById('edit_spp').value,
-            namaProduk: document.getElementById('edit_produk').value,
-            kategori: document.getElementById('edit_kategori').value,
-            kondisi: document.getElementById('edit_status').value,
-            stdWaktu: document.getElementById('edit_stdwaktu').value,
-            alasan: document.getElementById('edit_alasan').value,
-            uraian: document.getElementById('edit_uraian').value
+        window.arsipSedangDibuka = target; 
+        document.getElementById('tempatLinkDriveSukses').innerHTML = ''; 
+
+        document.getElementById('mainReportForm').style.display = 'none';
+        document.getElementById('arsipViewerModal').style.display = 'block';
+        
+        const areaSuntik = document.getElementById('areaSuntikLaporanBeku');
+        areaSuntik.innerHTML = target.htmlSnapshot;
+
+        const tabMati = areaSuntik.querySelector('.tab-content');
+        if(tabMati) { tabMati.style.display = 'block'; tabMati.style.opacity = '1'; }
+        window.scrollTo(0, 0);
+    }
+
+    function tutupPreviewArsip() {
+        document.getElementById('arsipViewerModal').style.display = 'none';
+        document.getElementById('mainReportForm').style.display = 'block';
+        document.getElementById('areaSuntikLaporanBeku').innerHTML = '';
+        document.getElementById('tempatLinkDriveSukses').innerHTML = '';
+        window.arsipSedangDibuka = null;
+    }
+
+    function hapusLaporanServer(id) { if(confirm("Hapus dokumen ini dari cloud server secara permanen?")) { database.ref('laporan_teknisi/' + id).remove().then(() => muatHistoriDariServer()); } }
+
+    function prosesKirimKeGDrive() {
+        const rujukan = window.arsipSedangDibuka;
+        if(!rujukan) { alert("Data arsip hilang."); return; }
+
+        const btn = document.getElementById('btnKirimDrive');
+        const oriTxt = btn.innerHTML;
+        btn.innerHTML = "⏳ Merender PDF Resolusi Tinggi..."; btn.disabled = true;
+
+        const elemenLaporan = document.getElementById('areaSuntikLaporanBeku');
+
+        const styleHitamPekat = document.createElement('style');
+        styleHitamPekat.innerHTML = `
+            #areaSuntikLaporanBeku * {
+                color: #000000 !important;
+                border-color: #000000 !important;
+                text-shadow: none !important;
+            }
+            #areaSuntikLaporanBeku table.form-table th,
+            #areaSuntikLaporanBeku .kop-surat,
+            #areaSuntikLaporanBeku .header-title,
+            #areaSuntikLaporanBeku .box-ttd-header,
+            #areaSuntikLaporanBeku .box-saran-title,
+            #areaSuntikLaporanBeku .box-header,
+            #areaSuntikLaporanBeku td[style*="background"] {
+                background-color: #e2e8f0 !important;
+                background: #e2e8f0 !important;
+            }
+            #areaSuntikLaporanBeku input, 
+            #areaSuntikLaporanBeku textarea,
+            #areaSuntikLaporanBeku div,
+            #areaSuntikLaporanBeku span,
+            #areaSuntikLaporanBeku .signer-name {
+                font-weight: 900 !important;
+                color: #000000 !important;
+                -webkit-text-fill-color: #000000 !important;
+                opacity: 1 !important;
+            }
+            #areaSuntikLaporanBeku .form-box,
+            #areaSuntikLaporanBeku .checkbox-group,
+            #areaSuntikLaporanBeku table.form-table td {
+                border: 1px solid #000000 !important;
+            }
+        `;
+        elemenLaporan.appendChild(styleHitamPekat);
+
+        const konfigurasiPDF = {
+            margin:       [5, 5, 5, 5],
+            filename:     `REPORT_${rujukan.tipe}_${Date.now()}.pdf`,
+            image:        { type: 'jpeg', quality: 1.0 },
+            html2canvas:  { 
+                scale: 4,
+                letterRendering: true,
+                useCORS: true, 
+                logging: false,
+                width: 820,
+                scrollY: 0
+            },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
-        db.ref(`history/${key}`).update(newData)
-            .then(() => { alert("✅ Data berhasil diubah!"); closeEditHistoryModal(); })
-            .catch((error) => alert("❌ Gagal merubah database: " + error.message));
-    }
 
-    function resumeJob(spp) {
-        const job = pendingJobs[spp];
-        if(!job) return;
-        document.getElementById("no_spp").value = spp;
-        const produkSelect = document.getElementById("nama_produk");
-        let isOther = true;
-        for (let i = 0; i < produkSelect.options.length; i++) {
-            if (produkSelect.options[i].value === job.namaProduk) { produkSelect.selectedIndex = i; isOther = false; break; }
-        }
-        if (isOther) { 
-            produkSelect.value = "Other"; 
-            document.getElementById("manual_nama_produk").value = job.namaProduk; 
-            document.getElementById("row_manual_produk").classList.remove('hidden');
-        }
-        updateProductData();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function calculateEffectiveHours(startStr, endStr) {
-        let totalMinutes = 0;
-        let current = new Date(startStr);
-        let endDate = new Date(endStr);
-        if (current >= endDate) return 0;
-        while (current < endDate) {
-            let h = current.getHours();
-            if (h !== 12 && h !== 16) totalMinutes++;
-            current.setMinutes(current.getMinutes() + 1);
-        }
-        return totalMinutes / 60;
-    }
-
-    async function saveToHistory(event) {
-        event.preventDefault();
-        const submitBtn = document.getElementById('btn-submit-form');
-        submitBtn.innerText = "MENGUNGGAH FOTO & MENYIMPAN..."; submitBtn.disabled = true;
-
-        const operator = JSON.parse(localStorage.getItem('loggedInUserPTTT')).name;
-        const waktuUpdate = document.getElementById("waktu_update").value;
-        const noSpp = document.getElementById("no_spp").value;
-        const stdWaktu = document.getElementById("std_waktu").value;
-        const uraian = document.getElementById("uraian_pekerjaan").value;
-        
-        // Pengecekan Dropdown dengan opsi "Other"
-        let namaProduk = document.getElementById("nama_produk").value;
-        if(namaProduk === "Other") namaProduk = document.getElementById("manual_nama_produk").value;
-        
-        let kategori = document.getElementById("kategori_pekerjaan").value;
-        if(kategori === "Other") kategori = document.getElementById("manual_kategori").value;
-        
-        let kondisi = document.getElementById("kondisi_kerja").value;
-        if(kondisi === "Other") kondisi = document.getElementById("manual_kondisi").value;
-        
-        let tahapProduksi = document.getElementById("tahap_produksi").value;
-        if(tahapProduksi === "Other") tahapProduksi = document.getElementById("manual_tahap").value;
-
-        // Ambil Data Manpower Standar untuk dikirim ke DB agar mudah dikalkulasi KPI
-        const stdOpString = document.getElementById("std_operator").value || "";
-        const stdManpower = parseInt(stdOpString) || 1; // Misal string "2 orang" di ekstrak jadi integer 2
-
-        const statusButuhAlasan = ["Idle Time", "Stoppage", "Takeover", "Lanjutkan Besok", "Lembur (Reguler) - 4 Jam", "Lembur (Sabtu/Minggu) - 9 Jam"];
-        let alasanKondisi = "-";
-
-        if (statusButuhAlasan.includes(kondisi)) {
-            alasanKondisi = prompt(`Input justifikasi status pekerjaan "${kondisi}":`);
-            if (alasanKondisi === null || alasanKondisi.trim() === "") {
-                alert("Proses digagalkan: Justifikasi wajib diisi.");
-                submitBtn.innerText = "SUBMIT DATA PRODUKSI"; submitBtn.disabled = false; return;
+        html2pdf().set(konfigurasiPDF).from(elemenLaporan).output('datauristring').then(function(pdfDataUri) {
+            
+            if(elemenLaporan.contains(styleHitamPekat)) {
+                elemenLaporan.removeChild(styleHitamPekat);
             }
-        }
 
-        const fileInput = document.getElementById('foto_aktual');
-        let fotoName = "TIDAK ADA";
+            const base64PDF = pdfDataUri.split(',')[1];
 
-        if (fileInput.files.length > 0) {
-            try {
-                const filesBase64 = [];
-                for(let i=0; i < fileInput.files.length; i++) filesBase64.push(await getBase64(fileInput.files[i]));
-                const scriptUrl = "https://script.google.com/macros/s/AKfycbxFe4vFwYNtVJ7pOIM8XiCaYfsdyMBthuPGhZpjTVF52K2ESGi2741RraFoq4TRmtyQ0g/exec"; 
-                const response = await fetch(scriptUrl, { method: "POST", body: JSON.stringify({ files: filesBase64 }), headers: { "Content-Type": "text/plain;charset=utf-8" }});
-                const result = await response.json();
-                if(result.status === "success") fotoName = result.files.map(f => `<a href="${f.url}" target="_blank" style="color:var(--neon-cyan); text-decoration:underline; display:block;">${f.name}</a>`).join('');
-                else throw new Error(result.message);
-            } catch(e) {
-                alert("Gagal mengunggah foto ke Google Drive: " + e.message);
-                submitBtn.innerText = "SUBMIT DATA PRODUKSI"; submitBtn.disabled = false; return;
-            }
-        }
-
-        let targetHours = parseInt(stdWaktu) || 0;
-        if (!spkTracking[noSpp]) {
-            let defaultStart = new Date(waktuUpdate); defaultStart.setHours(8, 0, 0, 0);
-            spkTracking[noSpp] = { target: targetHours, accumulatedUsed: 0, isFrozen: false, lastStart: defaultStart.toISOString() };
-        }
-
-        let tracker = spkTracking[noSpp]; let alertMessage = ""; let diffHours = 0;
-
-        if (tracker.isFrozen) {
-            alertMessage += `[SYS.LOG] Mengaktifkan ulang kalkulasi waktu dari status FREEZE.\n\n`;
-            tracker.isFrozen = false; tracker.lastStart = new Date(waktuUpdate).toISOString();
-        } else {
-            diffHours = calculateEffectiveHours(tracker.lastStart, waktuUpdate);
-            tracker.accumulatedUsed += diffHours;
-            if (statusButuhAlasan.includes(kondisi) && !kondisi.includes("Lembur")) {
-                tracker.isFrozen = true;
-                alertMessage += `[STATUS] ${kondisi}\nSistem menghentikan perhitungan waktu (FREEZE).\n\n`;
-            }
-        }
-
-        const currentFormNo = getNextFormNumber();
-        const formattedDate = new Date(waktuUpdate).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).toUpperCase();
-        
-        // Push data komprehensif ke History DB (Hanya mencatat stdManpower)
-        const promises = [db.ref('history').push().set({ 
-            formNo: currentFormNo, 
-            waktu: formattedDate, 
-            operator: operator, 
-            noSpp: noSpp, 
-            namaProduk: namaProduk, 
-            kategori: kategori, 
-            stdWaktu: stdWaktu, 
-            kondisi: kondisi, 
-            alasan: alasanKondisi, 
-            uraian: uraian, 
-            foto: fotoName,
-            stdManpower: stdManpower 
-        })];
-
-        if (kondisi.includes("Selesai")) promises.push(db.ref(`pendingJobs/${noSpp}`).remove());
-        else promises.push(db.ref(`pendingJobs/${noSpp}`).set({ namaProduk: namaProduk, operator: operator, status: kondisi, tahap: tahapProduksi }));
-
-        let counter = parseInt(localStorage.getItem('formCounterTT')) || 1;
-        promises.push(db.ref('config/formCounter').set(counter + 1));
-
-        Promise.all(promises)
-            .then(() => {
-                alert(alertMessage + "\n\n✅ Transmisi Data Sukses! Data & Foto telah tersimpan di cloud.");
-                // Reset form inputs
-                document.getElementById("no_spp").value = ""; 
-                document.getElementById("no_produksi").value = "";
-                document.getElementById("uraian_pekerjaan").value = ""; 
-                document.getElementById("foto_aktual").value = "";
-                
-                // Hide manual input rows
-                document.getElementById("row_manual_produk").classList.add('hidden');
-                document.getElementById("row_manual_kategori").classList.add('hidden');
-                document.getElementById("row_manual_kondisi").classList.add('hidden');
-                document.getElementById("row_manual_tahap").classList.add('hidden');
+            fetch(APPS_SCRIPT_WEBAPP_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    folderType: "Arsip_Laporan_PDF",
+                    filename: `REPORT_${rujukan.tipe}_${Date.now()}.pdf`,
+                    mimeType: "application/pdf",
+                    base64: base64PDF
+                })
             })
-            .catch((error) => alert("❌ Transmisi Gagal: " + error.message))
-            .finally(() => { submitBtn.innerText = "SUBMIT DATA PRODUKSI"; submitBtn.disabled = false; });
-    }
+            .then(respon => respon.json())
+            .then(hasil => {
+                btn.innerHTML = oriTxt; btn.disabled = false;
+                if(hasil.status === "success") tampilkanPesanSuksesGDrive(hasil.url, "Dokumen_PDF");
+                else alert("❌ Gagal simpan ke G-Drive: " + hasil.message);
+            })
+            .catch(err => { btn.innerHTML = oriTxt; btn.disabled = false; alert("❌ Jaringan error saat mengupload."); });
 
-    function searchTable() {
-        const filter = document.getElementById("searchInput").value.toLowerCase();
-        const tr = document.getElementById("historyTable").getElementsByTagName("tr");
-        for (let i = 1; i < tr.length; i++) { 
-            let match = false; let td = tr[i].getElementsByTagName("td");
-            for (let j = 0; j < td.length; j++) if (td[j] && td[j].innerHTML.toLowerCase().indexOf(filter) > -1) { match = true; break; }
-            tr[i].style.display = match ? "" : "none";
-        }
-    }
-
-    function exportToExcel() {
-        const html = document.getElementById("historyTable").outerHTML.replace(/ /g, '%20');
-        const downloadLink = document.createElement("a"); downloadLink.href = 'data:application/vnd.ms-excel;charset=utf-8,\ufeff' + html; downloadLink.download = "DB_Histori_Produksi.xls";
-        document.body.appendChild(downloadLink); downloadLink.click(); document.body.removeChild(downloadLink);
-    }
-
-    function updateLiveClock() {
-        const now = new Date();
-        document.getElementById('live_clock').innerHTML = "SYS.TIME: " + now.toLocaleDateString('en-GB', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).toUpperCase();
-        
-        const formattedRealTime = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-        const inputWaktu = document.getElementById('waktu_update');
-        if (inputWaktu && inputWaktu.value !== formattedRealTime) { inputWaktu.value = formattedRealTime; checkTimeLogic(); }
+        }).catch(err => { 
+            if(elemenLaporan.contains(styleHitamPekat)) elemenLaporan.removeChild(styleHitamPekat);
+            btn.innerHTML = oriTxt; btn.disabled = false; 
+            alert("❌ Kegagalan rendering memori HP: " + err); 
+        });
     }
     
-    setInterval(updateLiveClock, 1000); updateLiveClock();
+    function tampilkanPesanSuksesGDrive(urlGDrive, namaFile) {
+        const wadah = document.getElementById('tempatLinkDriveSukses');
+        wadah.innerHTML = `
+            <div style="background-color: #ecfdf5; border: 2px solid #10b981; color: #065f46; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <div><span style="font-size: 15px;">✅ <b>PDF Berhasil Tersimpan di Google Drive!</b></span><br><span style="font-size: 12px; color: #047857;">Nama File: <i>${namaFile}</i></span></div>
+                <div style="display: flex; gap: 10px;"><a href="${urlGDrive}" target="_blank" class="btn" style="background: #10b981; padding: 8px 15px; font-size: 13px; text-decoration: none;">🌐 Buka Folder</a><button onclick="salinLinkKeWa('${urlGDrive}')" class="btn" style="background: #25d366; padding: 8px 15px; font-size: 13px; border:none; cursor:pointer;">📋 Salin Link (WA)</button></div>
+            </div>
+        `;
+    }
+
+    function salinLinkKeWa(teksLink) {
+        navigator.clipboard.writeText(teksLink).then(() => alert("✅ Link Google Drive berhasil disalin!\n\nSilakan buka aplikasi WhatsApp, lalu klik 'Paste / Tempel' di chat pelanggan.")).catch(() => prompt("Gagal salin otomatis. Silakan Copy manual link di bawah ini:", teksLink));
+    }
 </script>
 </body>
 </html>
